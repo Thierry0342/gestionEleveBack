@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../data-access/database-connection");
 
-const ConjointeSchema = sequelize.define("Conjointe",{
+const EnfantSchema = sequelize.define("Enfant",{
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -16,20 +16,8 @@ const ConjointeSchema = sequelize.define("Conjointe",{
         type: DataTypes.STRING,
         allowNull: true,
       },
-      adresse: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      phone: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-    
+     
 
 });
-
-
- 
-
-module.exports = ConjointeSchema;
+module.exports = EnfantSchema;
 

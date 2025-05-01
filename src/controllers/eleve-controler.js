@@ -1,14 +1,21 @@
 const eleve_service = require("../service/eleve-service");
 const pointure_service=require("../service/pointure-service");
 const conjointe_service = require("../service/conjoite-service")
+const mere_service = require("../service/mere-service");
+const pere_service = require("../service/mere-service");
+const enfant_service = require("../service/enfant-service"); 
 
 
 async function create(req, res, next) {
   try {
     console.log(req.body);
     const data = req.body; // Récupère toutes les données envoyées
+
     const pointureData = req.body.pointure ;
     const conjointeData = req.body.conjointe ;
+    const mereData = req.body.mere;
+    const pereData = req.body.pere;
+    const enfantData = req.body.enfant || [] ;
     
 
     // Appel du service pour enregistrer les données
@@ -29,7 +36,36 @@ async function create(req, res, next) {
             eleveId : newEleve.id
         })
      }
-     
+     //creation table mere
+     if (mereData){
+        await mere_service.create({
+            nom:mereData.nom,
+            adresse : mereData.adresse,
+            phone : mereData.phone,
+            eleveId : newEleve.id
+        })
+     }
+     //creation table pere
+     if (pereData){
+        await pere_service.create({
+            nom:mereData.nom,
+            adresse : mereData.adresse,
+            phone : mereData.phone,
+            eleveId : newEleve.id
+        })
+     }
+     if (enfantData.length > 0){
+        for (const enfant of enfantData){
+            await pere_service.create({
+                nom : enfant.nom,
+                enfant :enfantData.dateNaissance,
+                sexe : enfant.sexe,
+                eleveId : enfant.id
+            })
+
+        }
+        
+     }
      const eleve = await eleve_service.findByPk(newEleve.id);
      
 

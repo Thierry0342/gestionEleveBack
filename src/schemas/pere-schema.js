@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../data-access/database-connection");
 
-const ConjointeSchema = sequelize.define("Conjointe",{
+const PereSchema = sequelize.define("Pere",{
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -27,9 +27,5 @@ const ConjointeSchema = sequelize.define("Conjointe",{
     
 
 });
-
-
- 
-
-module.exports = ConjointeSchema;
+module.exports = PereSchema;
 

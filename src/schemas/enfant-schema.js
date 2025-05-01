@@ -9,12 +9,12 @@ const EnfantSchema = sequelize.define("Enfant",{
       },
       eleveId:{
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
 
       },
         nom: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
      
 

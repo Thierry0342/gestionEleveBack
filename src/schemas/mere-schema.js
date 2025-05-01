@@ -14,15 +14,15 @@ const MereSchema = sequelize.define("Mere",{
       },
         nom: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       adresse: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       phone: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
     
 

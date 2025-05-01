@@ -2,11 +2,13 @@ const eleve_service = require("../service/eleve-service");
 const pointure_service=require("../service/pointure-service");
 const conjointe_service = require("../service/conjoite-service")
 const mere_service = require("../service/mere-service");
-const pere_service = require("../service/mere-service");
+const pere_service = require("../service/pere-service");
 const enfant_service = require("../service/enfant-service"); 
+const DB = require("../data-access/database-connection");
 
 
 async function create(req, res, next) {
+    const t = await DB.transaction(); // Commence une transaction
   try {
     console.log(req.body);
     const data = req.body; // Récupère toutes les données envoyées
@@ -25,7 +27,7 @@ async function create(req, res, next) {
         await pointure_service.create({
             ...pointureData,
             eleveId: newEleve.id,
-          });
+          } ,{ transaction: t }        );
      }
      //creation de la conjointe liee
       if (conjointeData){
@@ -34,38 +36,39 @@ async function create(req, res, next) {
             adresse : conjointeData.adresse,
             phone : conjointeData.phone,
             eleveId : newEleve.id
-        })
+        } ,{ transaction: t })
      }
      //creation table mere
      if (mereData){
         await mere_service.create({
-            nom:mereData.nom,
+            nom : mereData.nom,
             adresse : mereData.adresse,
             phone : mereData.phone,
             eleveId : newEleve.id
-        })
+        },{ transaction: t })
      }
      //creation table pere
      if (pereData){
         await pere_service.create({
-            nom:mereData.nom,
-            adresse : mereData.adresse,
-            phone : mereData.phone,
+            nom:pereData.nom,
+            adresse : pereData.adresse,
+            phone : pereData.phone,
             eleveId : newEleve.id
-        })
+        },{ transaction: t })
      }
      if (enfantData.length > 0){
         for (const enfant of enfantData){
-            await pere_service.create({
+            await enfant_service.create({
                 nom : enfant.nom,
                 enfant :enfantData.dateNaissance,
                 sexe : enfant.sexe,
-                eleveId : enfant.id
-            })
+                eleveId : newEleve.id
+            },{ transaction: t })
 
         }
         
      }
+     await t.commit(); // Valide toutes les insertions
      const eleve = await eleve_service.findByPk(newEleve.id);
      
 

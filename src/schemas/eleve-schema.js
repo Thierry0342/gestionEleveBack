@@ -53,7 +53,12 @@ const Eleve = sequelize.define("Eleve", {
   },
   situationFamiliale: {
     type: DataTypes.STRING,
+    allowNull: false,
+  },
+  SpecialisteAptitude:{
+    type: DataTypes.STRING,
     allowNull: true,
+
   },
   facebook: {
     type: DataTypes.STRING,
@@ -79,6 +84,19 @@ const Eleve = sequelize.define("Eleve", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  relationGenante :{
+    type : DataTypes.STRING,
+    allowNull : true,
+  },
+  religion : {
+    type : DataTypes.STRING,
+    allowNull : false,
+  },
+  niveau : {
+    type : DataTypes.STRING,
+    allowNull : true,
+  }
+
 }, {
   
   

@@ -12,19 +12,19 @@ const PointureSchema = sequelize.define("Pointure",{
         allowNull: true,
 
       },
-      chemise: {
+      tailleChemise: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      tete: {
+      tourTete: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      pantalon: {
+      pointurePantalon: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      chaussure: {
+      pointureChaussure: {
         type: DataTypes.STRING,
         allowNull: true,
       },

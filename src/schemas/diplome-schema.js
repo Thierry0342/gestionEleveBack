@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../data-access/database-connection");
 
-const SportSchema = sequelize.define("Sport",{
+const DiplomeSchema = sequelize.define("Diplome",{
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -12,52 +12,51 @@ const SportSchema = sequelize.define("Sport",{
         allowNull: false,
 
       },
-      Football:{
+      CEPE:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
         
       },
-      Basketball:{
+      BEPC:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
-        
       },
-      Volley_ball:{
+      BACC_S:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
-        
       },
-      Athletisme:{
+      BACC_L:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
-        
       },
-      Tennis:{
+      Licence:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
-        
       },
-      ArtsMartiaux:{
+      MasterOne:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
-
       },
-      Autre:{
+      MasterTwo:{
         type : DataTypes.BOOLEAN,
         allowNull : true,
         defaultValue : false,
-        
       },
-        
+      Doctorat:{
+        type : DataTypes.BOOLEAN,
+        allowNull : true,
+        defaultValue : false,
+      },
+    
     })
         
     
      
-module.exports = SportSchema;
+module.exports = DiplomeSchema;
 

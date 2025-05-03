@@ -7,7 +7,9 @@ const Enfant = require("./enfant-schema");
 const Soeur = require("./soeur-schema");
 const Frere = require("./frere-schema");
 const Accident =require ("./accident-schema");
-const Sport = require ("./sport-schema")
+const Sport = require ("./sport-schema");
+const Diplome = require ("./diplome-schema");
+const Filiere = require ("./filiere-schema")
 
 //relation pere fils
 Eleve.hasOne(Pere, { foreignKey: "eleveId" });
@@ -36,7 +38,15 @@ Eleve.hasOne(Accident, { foreignKey: "eleveId" });
 Accident.belongsTo(Eleve, { foreignKey: "eleveId" });
 
 //relation eleve sport
-Eleve.hasMany(Sport, { foreignKey: "eleveId" });
+Eleve.hasOne(Sport, { foreignKey: "eleveId" });
 Sport.belongsTo(Eleve, { foreignKey: "eleveId" });
+//eleve diplome 
+Eleve.hasOne(Diplome, { foreignKey: "eleveId" });
+Diplome.belongsTo(Eleve, { foreignKey: "eleveId" });
 
-module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport};
+//eleve filiere
+Eleve.hasOne(Filiere, { foreignKey: "eleveId" });
+Filiere.belongsTo(Eleve, { foreignKey: "eleveId" });
+
+
+module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere};

@@ -8,6 +8,8 @@ const soeur_service = require ("../service/soeur-service");
 const frere_service = require("../service/frere-service");
 const accident_service = require("../service/accident-service");
 const sport_service = require("../service/sport-service");
+const diplome_service = require ("../service/diplome-service");
+const filiere_service = require("../service/filiere-service");
 
 const DB = require("../data-access/database-connection");
 
@@ -23,17 +25,18 @@ async function create(req, res, next) {
     const mereData = req.body.famille.mere;
     const pereData = req.body.famille.pere;
     const accidentData = req.body.famille.accident;
-    const enfantData = req.body.famille.enfant || [] ;
+    const enfantData = req.body.famille.enfants || [] ;
     const soeurData = req.body.famille.soeur || [] ;
     const frereData = req.body.famille.frere || [] ;
     const sportData = req.body.sports || [] ;
+    const diplomeData = req.body.diplomes || [];
     
-
     // Appel du service pour enregistrer les données
 
     
     const newEleve = await eleve_service.create(data);
      // Création de la pointure lié
+
      if (pointureData){
         await pointure_service.create({
             ...pointureData,
@@ -113,9 +116,10 @@ async function create(req, res, next) {
           Volley_ball: false,
           Athletisme: false,
           Tennis: false,
+          ArtsMartiaux :false,
           Autre: false,
         };
-        
+
       
         const mapping = {
           Football: "Football",
@@ -123,6 +127,7 @@ async function create(req, res, next) {
           "Volley-ball": "Volley_ball",      
           Athlétisme: "Athletisme",      
           Tennis: "Tennis",
+          "arts martiaux" :"ArtsMartiaux",
           Autre: "Autre",
         };
       
@@ -135,6 +140,53 @@ async function create(req, res, next) {
       
         await sport_service.create(sportPayload, { transaction: t });
       }
+      //diplome 
+      
+      if (Array.isArray(diplomeData)) {
+        const diplomePayload = {
+          eleveId: newEleve.id,
+          CEPE: false,
+          BEPC: false,
+          BACC_S: false,
+          BACC_L: false,
+          Licence: false,
+          MasterOne: false,
+          MasterTwo: false,
+          Doctorat: false,
+        };
+
+      
+        const mapping = {
+          CEPE: "CEPE",
+          BEPC: "BEPC",
+          "BACC S": "BACC_S",      
+          Licence: "Athletisme",      
+          "Master One": "MasterOne",
+          "Master Two": "MasterTwo",
+          Doctorat : "Doctorat"
+        };
+      
+        diplomeData.forEach(diplome => {
+          const key = mapping[diplome];
+          if (key) {
+            diplomePayload[key] = true;
+          }
+        });
+        if(true){
+          await filiere_service.create({
+            eleveId : newEleve.id,
+            filiereLicence : req.body.filiereLicence,
+            filiereDoctorat : req.body.filiereDoctorat,
+            filiereMasterTwo : req.body.filiereMasterTwo,
+            filiereMasterOne : req.body.filiereMasterOne
+           
+          },{transaction : t})
+
+        }
+
+      
+        await diplome_service.create(diplomePayload, { transaction: t });
+      }
       
       
 
@@ -144,8 +196,7 @@ async function create(req, res, next) {
      //commit jiaby
      await t.commit(); // Valide toutes les insertions
      const eleve = await eleve_service.findByPk(newEleve.id);
-     
-
+  
     res.status(201).json( eleve);
   } catch (error) {
     console.error("Erreur lors de la création d’un élève :", error);
@@ -162,5 +213,21 @@ async function getAll(req, res) {
       res.status(500).json({ message: error.message });
     }
   }
+  async function deleteByPk(req,res,next) {
+    
+      try {
+        // Récupérer l'élève avec toutes ses relations
+        await eleve_service.deleteByPk(req.params.id)
+        res.status(200).json({ message: "Élève supprimé avec succès" });
+        
+      } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: error.message });
+        
+        
+      }
+    
+  }
 
-module.exports = { create,getAll};
+
+module.exports = { create,getAll,deleteByPk};

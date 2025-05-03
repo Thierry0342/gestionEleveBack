@@ -9,12 +9,12 @@ const FrereSchema = sequelize.define("Frere",{
       },
       eleveId:{
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
 
       },
         nom: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         }
     
 

@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../data-access/database-connection");
 
-const MereSchema = sequelize.define("Mere",{
+const FiliereSchema = sequelize.define("Filiere",{
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -12,20 +12,24 @@ const MereSchema = sequelize.define("Mere",{
         allowNull: false,
 
       },
-        nom: {
+        filiereLicence: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      adresse: {
+      filiereDoctorat: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      phone: {
+      filiereMasterOne: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      filiereMasterTwo: {
         type: DataTypes.STRING,
         allowNull: true,
       },
     
 
 });
-module.exports = MereSchema;
+module.exports = FiliereSchema;
 

@@ -9,20 +9,20 @@ const PereSchema = sequelize.define("Pere",{
       },
       eleveId:{
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
 
       },
         nom: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       adresse: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       phone: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
     
 

@@ -15,17 +15,36 @@ const Eleve = sequelize.define("Eleve", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  numCandidature : {
+    type : DataTypes.STRING,
+    allowNull : true,
+  },
+
+  escadron : {
+    type :DataTypes.INTEGER,
+    allowNull : false,
+
+  },
+  peloton : {
+    type :DataTypes.INTEGER,
+    allowNull : false,
+  },
   CIN: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   dateDelivrance: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   lieuDelivrance: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+  },
+  centreConcours :{
+    type : DataTypes.STRING,
+    allowNull : true,
+
   },
   duplicata: {
     type: DataTypes.DATEONLY,
@@ -55,7 +74,7 @@ const Eleve = sequelize.define("Eleve", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  SpecialisteAptitude:{
+  Specialiste:{
     type: DataTypes.STRING,
     allowNull: true,
 
@@ -95,7 +114,26 @@ const Eleve = sequelize.define("Eleve", {
   niveau : {
     type : DataTypes.STRING,
     allowNull : true,
+  },
+  SpecialisteAptitude :{
+    type : DataTypes.STRING,
+    allowNull : true,
+
+  },
+  groupeSaguin : {
+    type : DataTypes.STRING,
+    allowNull : true,
+  },
+  niveau:{
+    type : DataTypes.STRING,
+    allowNull : true,
+  },
+  fady:{
+    type : DataTypes.STRING,
+    allowNull : true,
+
   }
+
 
 }, {
   

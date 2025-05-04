@@ -24,8 +24,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-
 app.use("/api/eleve", eleve_router);
+
+app.use('/uploads/pictures/images', express.static(path.join(__dirname, 'uploads/pictures/images')));
 
 
 //association

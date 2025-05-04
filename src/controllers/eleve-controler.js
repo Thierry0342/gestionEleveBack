@@ -11,6 +11,7 @@ const sport_service = require("../service/sport-service");
 const diplome_service = require ("../service/diplome-service");
 const filiere_service = require("../service/filiere-service");
 
+
 const DB = require("../data-access/database-connection");
 
 
@@ -18,22 +19,36 @@ async function create(req, res, next) {
     const t = await DB.transaction(); // Commence une transaction
   try {
     console.log(req.body);
-    const data = req.body; // Récupère toutes les données envoyées
+    console.log(req.file);
+     //pour l'image 
+     const imageFile = req.file;
+     // Chemin relatif 
+     const imageUrl = imageFile
+       ? `/data/uploads/pictures/images/${imageFile.filename}`
+       : null;
+     
+       const data = {
+        ...req.body, // contient nom, prénom, etc.
+        image: imageUrl, //  on ajoute ici l'image à enregistrer
+      };
+      // Parser toutes les données JSON encodées en string
+         const pointureData = req.body.pointure ? JSON.parse(req.body.pointure) : null;
 
-    const pointureData = req.body.pointure ;
-    const conjointeData = req.body.famille.conjointe ;
-    const mereData = req.body.famille.mere;
-    const pereData = req.body.famille.pere;
-    const accidentData = req.body.famille.accident;
-    const enfantData = req.body.famille.enfants || [] ;
-    const soeurData = req.body.famille.soeur || [] ;
-    const frereData = req.body.famille.frere || [] ;
-    const sportData = req.body.sports || [] ;
-    const diplomeData = req.body.diplomes || [];
+          const familleData = req.body.famille ? JSON.parse(req.body.famille) : {};
+          const conjointeData = familleData.conjointe || null;
+          const mereData = familleData.mere || null;
+           const pereData = familleData.pere || null;
+           const accidentData = familleData.accident || null;
+          const enfantData = familleData.enfants || [];
+          const soeurData = familleData.soeur || [];
+          const frereData = familleData.frere || [];
+
+          const sportData = req.body.sports ? JSON.parse(req.body.sports) : [];
+          const diplomeData = req.body.diplomes ? JSON.parse(req.body.diplomes) : [];
+
+
     
     // Appel du service pour enregistrer les données
-
-    
     const newEleve = await eleve_service.create(data);
      // Création de la pointure lié
 
@@ -160,7 +175,7 @@ async function create(req, res, next) {
           CEPE: "CEPE",
           BEPC: "BEPC",
           "BACC S": "BACC_S",      
-          Licence: "Athletisme",      
+          Licence: "Licence",      
           "Master One": "MasterOne",
           "Master Two": "MasterTwo",
           Doctorat : "Doctorat"
@@ -184,7 +199,7 @@ async function create(req, res, next) {
 
         }
 
-      
+      //envoie
         await diplome_service.create(diplomePayload, { transaction: t });
       }
       

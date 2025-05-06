@@ -18,8 +18,8 @@ const DB = require("../data-access/database-connection");
 async function create(req, res, next) {
     const t = await DB.transaction(); // Commence une transaction
   try {
-    console.log(req.body);
-    console.log(req.file);
+    //console.log(req.body);
+    //console.log(req.file);
      //pour l'image 
      const imageFile = req.file;
      // Chemin relatif 
@@ -38,7 +38,7 @@ async function create(req, res, next) {
           const conjointeData = familleData.conjointe || null;
           const mereData = familleData.mere || null;
            const pereData = familleData.pere || null;
-           const accidentData = familleData.accident || null;
+           const accidentData = familleData.accidents || null;
           const enfantData = familleData.enfants || [];
           const soeurData = familleData.soeur || [];
           const frereData = familleData.frere || [];
@@ -49,7 +49,16 @@ async function create(req, res, next) {
 
     
     // Appel du service pour enregistrer les données
+    console.log(data);
     const newEleve = await eleve_service.create(data);
+   
+   
+    if (pointureData){
+      await pointure_service.create({
+          ...pointureData,
+          eleveId: newEleve.id,
+        } ,{ transaction: t }        );
+   }
      // Création de la pointure lié
 
      if (pointureData){
@@ -220,14 +229,27 @@ async function create(req, res, next) {
 }
 // get all eleve G
 async function getAll(req, res) {
-    try {
-      const eleves = await eleve_service.findAll();
-      res.status(201).json( eleves);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des élèves :", error);
-      res.status(500).json({ message: error.message });
-    }
+  try {
+    const eleves = await eleve_service.findAll();
+
+    const hostUrl = `${req.protocol}://${req.get('host')}`;
+
+    const elevesWithImage = eleves.map(eleve => {
+      const plainEleve = eleve.toJSON(); // conversion ici
+      return {
+        ...plainEleve,
+        image: plainEleve.image ? `${hostUrl}${plainEleve.image}` : null
+      };
+    });
+
+    res.status(200).json(elevesWithImage);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des élèves :", error);
+    res.status(500).json({ message: error.message });
   }
+}
+
+
   async function deleteByPk(req,res,next) {
     
       try {
@@ -243,6 +265,48 @@ async function getAll(req, res) {
       }
     
   }
+  async function update(req, res) {
+    try {
+      const { id } = req.params;
+      let updatedData = req.body;
+  
+      // ⬇️ Ajoute ici la fonction utilitaire pour parser les champs JSON
+      function parseIfJson(field) {
+        try {
+          if (typeof field === "string") {
+            return JSON.parse(field);
+          }
+          return field;
+        } catch (e) {
+          console.warn("Erreur de parsing JSON:", e);
+          return null;
+        }
+      }
+  
+      // ⬇️ Parse les champs complexes s’ils sont en JSON
+      updatedData.famille = parseIfJson(updatedData.famille);
+      updatedData.sports = parseIfJson(updatedData.sports);
+      updatedData.diplomes = parseIfJson(updatedData.diplomes);
+  
+      // ⬇️ Ajout de l’image si présente
+      if (req.file) {
+        const imageUrl = `/data/uploads/pictures/images/${req.file.filename}`;
+        updatedData.image = imageUrl;
+      }
+  
+      // ⬇️ Mise à jour via le service
+      const eleve = await eleve_service.updateById(id, updatedData, {
+        transaction: req.transaction,
+      });
+  
+      res.status(200).json(eleve);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
+  
 
 
-module.exports = { create,getAll,deleteByPk};
+module.exports = { create,getAll,deleteByPk,update};

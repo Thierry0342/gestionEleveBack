@@ -10,6 +10,8 @@ var indexRouter = require("./src/routes/index");
 const DB = require("./src/data-access/database-connection");
 //router
 var eleve_router = require("./src/routes/eleve-route")
+var cour_route = require("./src/routes/cour-route")
+var user_route = require("./src/routes/user-route");
 
 
 const { log } = require("console");
@@ -25,9 +27,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/eleve", eleve_router);
+app.use("/api/cour",cour_route)
+app.use("/api/user",user_route)
 
-app.use('/uploads/pictures/images', express.static(path.join(__dirname, 'uploads/pictures/images')));
-
+app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 
 //association
 require("./src/schemas/association");

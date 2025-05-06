@@ -7,6 +7,11 @@ const Eleve = sequelize.define("Eleve", {
     primaryKey: true,
     autoIncrement: true,
   },
+  cour:{
+    type :DataTypes.INTEGER,
+    allowNull:false,
+
+  },
   nom: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -305,8 +305,32 @@ async function getAll(req, res) {
       res.status(500).json({ error: error.message });
     }
   }
+  //get eleve by incorporation 
+   async function getEleveByIncorporation (req, res) {
+    try {
+      const inc = req.params.inc;
+      const cour = req.query.cour;
+      console.log('Incorporation:', inc);
+       console.log('Cours:', cour);
+      if (!inc || !cour) {
+        return res.status(400).json({ message: "Incorporation et cours sont nécessaires" });
+      }
+   // Rechercher l'élève par incorporation ET par cours
+      const eleve = await eleve_service.findByIncorporation({incorporation: inc, cour: cour });
   
+      if (!eleve) {
+        return res.status(404).json({ message: "Élève non trouvé pour ce cours" });
+      }
+  
+      // 3. Retourner l'élève et le cours
+      res.json({ eleve });
+  
+    } catch (error) {
+      console.error("Erreur récupération élève :", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  };
   
 
 
-module.exports = { create,getAll,deleteByPk,update};
+module.exports = { create,getAll,deleteByPk,update,getEleveByIncorporation};

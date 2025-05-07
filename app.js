@@ -12,6 +12,8 @@ const DB = require("./src/data-access/database-connection");
 var eleve_router = require("./src/routes/eleve-route")
 var cour_route = require("./src/routes/cour-route")
 var user_route = require("./src/routes/user-route");
+var absence_route=require("./src/routes/absence-route");
+
 
 
 const { log } = require("console");
@@ -27,8 +29,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/eleve", eleve_router);
-app.use("/api/cour",cour_route)
-app.use("/api/user",user_route)
+app.use("/api/cour",cour_route);
+app.use("/api/user",user_route);
+app.use("/api/absence",absence_route);
+
+
+
 
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 

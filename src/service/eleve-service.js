@@ -10,6 +10,7 @@ const Sport = require ('../schemas/sport-schema');
 const Accident = require ('../schemas/accident-schema');
 const Diplome = require ('../schemas/diplome-schema');
 const Filiere = require ('../schemas/filiere-schema');
+const { where } = require("sequelize");
 
 async function create(eleve , options ={}){
     return Eleve.create(eleve,options) //option contien transaction
@@ -182,10 +183,28 @@ async function findAll() {
     return eleve;
 }
 
+// Fonction pour trouver un élève
+async function findByIncorporation({ incorporation, cour }) {
+ 
+  try {
+    
+    const eleve = await Eleve.findOne({
+      where: {
+        numeroIncorporation: incorporation,  
+        cour: cour  
+      }
+    });
 
-  //modif matricule 
-  
+    // Si l'élève est trouvé, on le retourne
+    return eleve;
+  } catch (error) {
+    // Si une erreur survient lors de la recherche
+    console.error("Erreur lors de la recherche de l'élève :", error);
+    throw new Error("Erreur lors de la récupération de l'élève");
+  }
+}
+
   
   
 
-module.exports={create,findAll,findByPk,deleteByPk,updateById };
+module.exports={create,findAll,findByPk,deleteByPk,updateById,findByIncorporation };

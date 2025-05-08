@@ -13,6 +13,7 @@ var eleve_router = require("./src/routes/eleve-route")
 var cour_route = require("./src/routes/cour-route")
 var user_route = require("./src/routes/user-route");
 var absence_route=require("./src/routes/absence-route");
+var cadre_route = require("./src/routes/cadre-route");
 
 
 
@@ -32,6 +33,7 @@ app.use("/api/eleve", eleve_router);
 app.use("/api/cour",cour_route);
 app.use("/api/user",user_route);
 app.use("/api/absence",absence_route);
+app.use("/api/cadre",cadre_route);
 
 
 

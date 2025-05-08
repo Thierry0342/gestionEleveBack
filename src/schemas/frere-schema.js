@@ -19,5 +19,9 @@ const FrereSchema = sequelize.define("Frere",{
     
 
 });
+(async () => {
+    await sequelize.sync({ alter: true });
+  })();
+
 module.exports = FrereSchema;
 

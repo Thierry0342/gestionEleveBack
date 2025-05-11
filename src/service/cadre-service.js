@@ -17,8 +17,8 @@ async function deleteCadre(id) {
 }
 
 // Obtenir les absences d'un élève donné 
-async function findCadreByid(id) {
-  return Cadre.findAll({ where: { id } });
+async function getCadreById(id) {
+  return Cadre.findOne({ where: { matricule:id } });
 }
 
 async function updateCadre(id, data) {
@@ -31,7 +31,7 @@ module.exports = {
     createCadre,
     findAllCadre,
     deleteCadre,
-    findCadreByid,
+    getCadreById,
     updateCadre
   
 };

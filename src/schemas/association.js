@@ -12,6 +12,9 @@ const Diplome = require ("./diplome-schema");
 const Filiere = require ("./filiere-schema")
 //absence
 const Absence = require ("./absence-schema");
+//consultation
+const Cadre = require("./cadre-schema");
+const Consultation = require ("./consultation-schema");
 
 //relation pere fils
 Eleve.hasOne(Pere, { foreignKey: "eleveId" });
@@ -52,6 +55,15 @@ Filiere.belongsTo(Eleve, { foreignKey: "eleveId" });
 //eleve absence
 Eleve.hasMany(Absence,{foreignKey:"eleveId"});
 Absence.belongsTo(Eleve,{ foreignKey: "eleveId"})
+//aleve cadre consultation
+Eleve.hasMany(Consultation, { foreignKey: 'eleveId' });
+Consultation.belongsTo(Eleve, { foreignKey: 'eleveId' });
+
+// Un cadre peut avoir plusieurs consultations
+Cadre.hasMany(Consultation, { foreignKey: 'cadreId' });
+Consultation.belongsTo(Cadre, { foreignKey: 'cadreId' });
 
 
-module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence};
+
+
+module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre};

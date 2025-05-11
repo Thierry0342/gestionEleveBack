@@ -1,17 +1,17 @@
 const User = require("../schemas/user-schema");
 
-// Créer un cours
+// Créer
 async function createUser(data) {
   return User.create(data);
 }
 
-// Obtenir tous les cours
+// Obtenir tou
 async function findAllUser() {
   return User.findAll(); // tri
 }
 
 async function deleteUser(id) {
-    return User.destroy({ where: { id } }); //  méthode Sequelize
+    return User.destroy({ where: { id } }); //  
   }
   async function findUserByUsername(username) {
     return User.findOne({ where: { username } });

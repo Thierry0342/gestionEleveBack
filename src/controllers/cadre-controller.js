@@ -38,12 +38,14 @@ async function  deleteCadre(req,res) {
   }
   
 // Obtenir les absences par élève
-async function getCadreById(req, res) {
+async function getCadreBy(req, res) {
   try {
-    const id = req.params.eleveId;
+    const id = req.params.id;
+    console.log(id);
     const cadre = await cadre_service.getCadreById(id);
     res.json(cadre);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Erreur lors de la récupération de donnee " });
   }
 }
@@ -68,7 +70,7 @@ async function updateCadre(req, res) {
   }
 
 module.exports = {
-    getCadreById,
+    getCadreBy,
     deleteCadre,
     getAllCadre,
     createCadre,

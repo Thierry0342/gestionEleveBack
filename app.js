@@ -15,9 +15,11 @@ var user_route = require("./src/routes/user-route");
 var absence_route=require("./src/routes/absence-route");
 var cadre_route = require("./src/routes/cadre-route");
 var consultation_route=require("./src/routes/consultation-route");
+var Pointure_route = require("./src/routes/pointure-route");
+const sequelize = require('./src/data-access/database-connection');
 
-
-
+const logRoutes = require("./src/routes/logs-route");
+const logMiddleware = require('./src/middlewares/logMiddleware');
 const { log } = require("console");
 
 var app = express();
@@ -29,6 +31,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+// Utiliser le middleware pour toutes les routes
+app.use(logMiddleware);
 
 app.use("/api/eleve", eleve_router);
 app.use("/api/cour",cour_route);
@@ -36,8 +40,8 @@ app.use("/api/user",user_route);
 app.use("/api/absence",absence_route);
 app.use("/api/cadre",cadre_route);
 app.use("/api/consultation",consultation_route);
-
-
+app.use("/api/logs",logRoutes);
+app.use("/api/pointures",Pointure_route);
 
 
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));

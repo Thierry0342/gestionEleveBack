@@ -60,13 +60,6 @@ async function create(req, res, next) {
         } ,{ transaction: t }        );
    }
      // Création de la pointure lié
-
-     if (pointureData){
-        await pointure_service.create({
-            ...pointureData,
-            eleveId: newEleve.id,
-          } ,{ transaction: t }        );
-     }
      //creation de la conjointe liee
       if (conjointeData){
         await conjointe_service.create({
@@ -287,6 +280,8 @@ async function getAll(req, res) {
       updatedData.famille = parseIfJson(updatedData.famille);
       updatedData.sports = parseIfJson(updatedData.sports);
       updatedData.diplomes = parseIfJson(updatedData.diplomes);
+      updatedData.Pointure = parseIfJson(updatedData.Pointure);
+      
   
       // ⬇️ Ajout de l’image si présente
       if (req.file) {

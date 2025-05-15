@@ -74,9 +74,9 @@ async function findAll() {
     // Parse les champs complexes
     updatedData.famille = parseIfJson(updatedData.famille);
     updatedData.sports = parseIfJson(updatedData.sports);
-    updatedData.diplomes = parseIfJson(updatedData.diplomes);
-    updatedData.filiere = parseIfJson(updatedData.filiere);
-    updatedData.pointure = parseIfJson(updatedData.pointure);
+    updatedData.Diplome = parseIfJson(updatedData.Diplome);
+    updatedData.Filiere = parseIfJson(updatedData.Filiere);
+    updatedData.Pointure = parseIfJson(updatedData.Pointure);
     
     // Récupérer l'élève avec toutes ses relations
     const eleve = await Eleve.findByPk(id, {
@@ -92,46 +92,93 @@ async function findAll() {
     await eleve.update(updatedData, { transaction: options.transaction });
 
     // Mettre à jour ses relations (si présentes dans les données reçues)
-    if (updatedData.pointure) {
-      await eleve.Pointure.update(updatedData.pointure, { transaction: options.transaction });
+   
+    if (updatedData.Pointure) {
+      await Pointure.update(updatedData.Pointure, { where: { eleveId: id }, transaction: options.transaction });
     }
 
     if (updatedData.famille) {
       const familleData = updatedData.famille;
 
       if (familleData.conjointe) {
-        await eleve.Conjointe.update(familleData.conjointe, { transaction: options.transaction });
+        await Conjointe.update(familleData.conjointe,{ where: { eleveId: id }, transaction: options.transaction });
       }
 
       if (familleData.mere) {
-        await eleve.Mere.update(familleData.mere, { transaction: options.transaction });
+        await Mere.update(familleData.mere, { where: { eleveId: id }, transaction: options.transaction });
       }
 
       if (familleData.pere) {
-        await eleve.Pere.update(familleData.pere, { transaction: options.transaction });
+        await Pere.update(familleData.pere, { where: { eleveId: id }, transaction: options.transaction });
       }
 
       if (familleData.accident) {
-        await eleve.Accident.update(familleData.accident, { transaction: options.transaction });
+        await Accident.update(familleData.accident, { where: { eleveId: id }, transaction: options.transaction });
       }
+      console.log("********,",familleData.enfants)
+      // Gérer les enfants
+if (familleData.enfants) {
+  const enfantsActuels = await Enfant.findAll({ where: { eleveId: id }, transaction: options.transaction });
 
-      if (familleData.enfants && familleData.enfants.length > 0) {
-        for (const enfant of familleData.enfants) {
-          await Enfant.update(enfant, { where: { eleveId: id }, transaction: options.transaction });
-        }
-      }
+  const idsReçus = familleData.enfants.filter(e => e.id).map(e => e.id);
 
-      if (familleData.soeur && familleData.soeur.length > 0) {
-        for (const soeur of familleData.soeur) {
-          await Soeur.update(soeur, { where: { eleveId: id }, transaction: options.transaction });
-        }
-      }
+  // 1. Supprimer ceux qui ne sont plus dans la liste
+  for (const enfant of enfantsActuels) {
+    if (!idsReçus.includes(enfant.id)) {
+      await Enfant.destroy({ where: { id: enfant.id }, transaction: options.transaction });
+    }
+  }
 
-      if (familleData.frere && familleData.frere.length > 0) {
-        for (const frere of familleData.frere) {
-          await Frere.update(frere, { where: { eleveId: id }, transaction: options.transaction });
-        }
-      }
+  // 2. Créer ou mettre à jour les enfants
+  for (const enfant of familleData.enfants) {
+    if (enfant.id) {
+      await Enfant.update(enfant, { where: { id: enfant.id }, transaction: options.transaction });
+    } else {
+      await Enfant.create({ ...enfant, eleveId: id }, { transaction: options.transaction });
+    }
+  }
+}
+//soeur
+if (familleData.soeur) {
+  const soeursActuelles = await Soeur.findAll({ where: { eleveId: id }, transaction: options.transaction });
+  const idsReçus = familleData.soeur.filter(s => s.id).map(s => s.id);
+
+  for (const soeur of soeursActuelles) {
+    if (!idsReçus.includes(soeur.id)) {
+      await Soeur.destroy({ where: { id: soeur.id }, transaction: options.transaction });
+    }
+  }
+
+  for (const soeur of familleData.soeur) {
+    if (soeur.id) {
+      await Soeur.update(soeur, { where: { id: soeur.id }, transaction: options.transaction });
+    } else {
+      await Soeur.create({ ...soeur, eleveId: id }, { transaction: options.transaction });
+    }
+  }
+}
+if (familleData.frere) {
+  const freresActuels = await Frere.findAll({ where: { eleveId: id }, transaction: options.transaction });
+  const idsReçus = familleData.frere.filter(f => f.id).map(f => f.id);
+
+  for (const frere of freresActuels) {
+    if (!idsReçus.includes(frere.id)) {
+      await Frere.destroy({ where: { id: frere.id }, transaction: options.transaction });
+    }
+  }
+
+  for (const frere of familleData.frere) {
+    if (frere.id) {
+      await Frere.update(frere, { where: { id: frere.id }, transaction: options.transaction });
+    } else {
+      await Frere.create({ ...frere, eleveId: id }, { transaction: options.transaction });
+    }
+  }
+}
+
+
+
+      
     }
 
     // Mise à jour des sports
@@ -155,7 +202,7 @@ async function findAll() {
     }
 
     // Mise à jour des diplômes
-    if (updatedData.diplomes) {
+    if (updatedData.Diplome && typeof updatedData.Diplome === 'object') {
       const diplomePayload = {
         eleveId: id,
         CEPE: false,
@@ -167,17 +214,20 @@ async function findAll() {
         MasterTwo: false,
         Doctorat: false,
       };
-
-      updatedData.diplomes.forEach(diplome => {
-        if (diplome) diplomePayload[diplome] = true;
-      });
-
+    
+      // Met à jour les champs à true là où c’est vrai dans l’objet
+      for (const [key, value] of Object.entries(updatedData.Diplome)) {
+        if (diplomePayload.hasOwnProperty(key) && value === true) {
+          diplomePayload[key] = true;
+        }
+      }
+    
       await Diplome.update(diplomePayload, { where: { eleveId: id }, transaction: options.transaction });
     }
 
     // Mise à jour de la filière
-    if (updatedData.filiere) {
-      await Filiere.update(updatedData.filiere, { where: { eleveId: id }, transaction: options.transaction });
+    if (updatedData.Filiere) {
+      await Filiere.update(updatedData.Filiere, { where: { eleveId: id }, transaction: options.transaction });
     }
 
     return eleve;

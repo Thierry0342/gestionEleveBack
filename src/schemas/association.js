@@ -15,6 +15,9 @@ const Absence = require ("./absence-schema");
 //consultation
 const Cadre = require("./cadre-schema");
 const Consultation = require ("./consultation-schema");
+//logs
+const Log = require ("./logs-schema");
+const User = require ("./user-schema");
 
 //relation pere fils
 Eleve.hasOne(Pere, { foreignKey: "eleveId" });
@@ -63,7 +66,8 @@ Consultation.belongsTo(Eleve, { foreignKey: 'eleveId' });
 Cadre.hasMany(Consultation, { foreignKey: 'cadreId' });
 Consultation.belongsTo(Cadre, { foreignKey: 'cadreId' });
 
+User.hasMany(Log, { foreignKey: "userId" });
+Log.belongsTo(User, { foreignKey: "userId" });
 
 
-
-module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre};
+module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre,User,Log};

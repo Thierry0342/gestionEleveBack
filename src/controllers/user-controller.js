@@ -1,5 +1,5 @@
 const user_service = require("../service/user-service");
-
+const {createLog} = require ('../service/logs-service');
 // Obtenir tous les user
 exports.getAlluser = async (req, res) => {
   try {
@@ -50,6 +50,8 @@ exports.authenticateUser = async (req, res) => {
       }
   
       res.status(200).json({ message: "Authentification réussie", user });
+      //log
+      await createLog(user.id, 'Connexion', `Utilisateur ${user.username} connecté`);
     } catch (err) {
       console.error("Erreur d'authentification", err);
       res.status(500).json({ error: "Erreur serveur" });

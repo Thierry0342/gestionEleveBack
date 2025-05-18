@@ -10,6 +10,16 @@ exports.getAlluser = async (req, res) => {
     console.log(err);
   }
 };
+//get by id 
+exports.getUser = async (req, res) => {
+  try {
+    const user = await user_service.getUserById(req.params.id);
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
+    console.log(err);
+  }
+};
 
 // Créer un user
 exports.createUser = async (req, res) => {
@@ -58,25 +68,51 @@ exports.authenticateUser = async (req, res) => {
     }
   };
   exports.updateUser = async (req, res) => {
+   
+
     try {
       const { id } = req.params;
-      const { username, type } = req.body;
+      const { username, type, currentPassword, newPassword, confirmPassword } = req.body;
   
       if (!username || !type) {
         return res.status(400).json({ error: "Données incomplètes pour la mise à jour." });
       }
   
-      const updatedUser = await user_service.updateUser(id, { username, type });
-  
-      if (!updatedUser) {
+      const user = await user_service.getUserById(id);
+      if (!user) {
         return res.status(404).json({ error: "Utilisateur non trouvé." });
       }
   
-      res.json({ message: "Utilisateur modifié avec succès", updatedUser });
+      if (newPassword || confirmPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: "Le mot de passe actuel est requis." });
+        }
+  
+        // Comparaison simple en clair
+        if (user.password !== currentPassword) {
+          return res.status(401).json({ error: "Mot de passe actuel incorrect." });
+        }
+  
+        if (newPassword !== confirmPassword) {
+          return res.status(400).json({ error: "Le nouveau mot de passe ne correspond pas à la confirmation." });
+        }
+  
+        // On met à jour directement sans hash
+        user.password = newPassword;
+      }
+  
+      user.username = username;
+      user.type = type;
+  
+      await user.save();
+  
+      res.json({ message: "Utilisateur mis à jour avec succès", user });
     } catch (err) {
       console.error("Erreur lors de la mise à jour", err);
       res.status(500).json({ error: "Erreur serveur lors de la mise à jour." });
     }
   };
+  
+  
   
 

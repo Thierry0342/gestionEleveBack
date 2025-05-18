@@ -16,6 +16,9 @@ async function deleteUser(id) {
   async function findUserByUsername(username) {
     return User.findOne({ where: { username } });
   }
+  async function getUserById(id){
+    return User.findOne({where:{id}});
+  }
   async function updateUser(id, data) {
     const user = await User.findByPk(id);
     if (!user) return null;
@@ -28,5 +31,6 @@ module.exports = {
     findAllUser,
     deleteUser,
     findUserByUsername,
-    updateUser
+    updateUser,
+    getUserById
 };

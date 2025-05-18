@@ -18,7 +18,7 @@ var consultation_route=require("./src/routes/consultation-route");
 var Pointure_route = require("./src/routes/pointure-route");
 var spaSpeciale_route=require("./src/routes/spaSpeciale-route")
 const sequelize = require('./src/data-access/database-connection');
-
+var permission_route = require('./src/routes/permission-route');
 const logRoutes = require("./src/routes/logs-route");
 const logMiddleware = require('./src/middlewares/logMiddleware');
 const { log } = require("console");
@@ -45,7 +45,7 @@ app.use("/api/consultation",consultation_route);
 app.use("/api/logs",logRoutes);
 app.use("/api/pointures",Pointure_route);
 app.use("/api/spaSpeciale",spaSpeciale_route);
-
+app.use("/api/permission",permission_route);
 
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 

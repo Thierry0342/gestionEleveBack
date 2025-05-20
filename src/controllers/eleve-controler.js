@@ -305,8 +305,8 @@ async function getAll(req, res) {
     try {
       const inc = req.params.inc;
       const cour = req.query.cour;
-      console.log('Incorporation:', inc);
-       console.log('Cours:', cour);
+     // console.log('Incorporation:', inc);
+      // console.log('Cours:', cour);
       if (!inc || !cour) {
         return res.status(400).json({ message: "Incorporation et cours sont nécessaires" });
       }

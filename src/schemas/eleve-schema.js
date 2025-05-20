@@ -79,6 +79,11 @@ const Eleve = sequelize.define("Eleve", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  sexe:{
+    type:DataTypes.STRING,
+    allowNull:false
+
+  },
   Specialiste:{
     type: DataTypes.STRING,
     allowNull: true,

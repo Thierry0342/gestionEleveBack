@@ -17,6 +17,7 @@ async function createSpa(req,res){
         res.json(resp)
         
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: "erreur" });
         
     }

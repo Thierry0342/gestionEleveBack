@@ -41,12 +41,7 @@ const PermissionSchema = sequelize.define("Permission",{
         type: DataTypes.INTEGER,
         allowNull: false,
 
-      },
-
-      
-
-    
-    
+      },   
 
 });
 

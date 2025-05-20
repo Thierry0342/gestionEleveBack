@@ -16,7 +16,8 @@ var absence_route=require("./src/routes/absence-route");
 var cadre_route = require("./src/routes/cadre-route");
 var consultation_route=require("./src/routes/consultation-route");
 var Pointure_route = require("./src/routes/pointure-route");
-var spaSpeciale_route=require("./src/routes/spaSpeciale-route")
+var spaSpeciale_route=require("./src/routes/spaSpeciale-route");
+var note_route=require("./src/routes/note-route");
 const sequelize = require('./src/data-access/database-connection');
 var permission_route = require('./src/routes/permission-route');
 const logRoutes = require("./src/routes/logs-route");
@@ -46,6 +47,7 @@ app.use("/api/logs",logRoutes);
 app.use("/api/pointures",Pointure_route);
 app.use("/api/spaSpeciale",spaSpeciale_route);
 app.use("/api/permission",permission_route);
+app.use("/api/note",note_route);
 
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 

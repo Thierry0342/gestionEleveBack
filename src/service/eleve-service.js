@@ -10,6 +10,7 @@ const Sport = require ('../schemas/sport-schema');
 const Accident = require ('../schemas/accident-schema');
 const Diplome = require ('../schemas/diplome-schema');
 const Filiere = require ('../schemas/filiere-schema');
+const Note = require ('../schemas/note-schema');
 const { where } = require("sequelize");
 
 async function create(eleve , options ={}){
@@ -17,20 +18,20 @@ async function create(eleve , options ={}){
 }
 async function findAll() {
     return Eleve.findAll({
-      include: [Pointure,Conjointe,Mere,Pere,Enfant,Soeur,Frere,Sport,Accident,Diplome,Filiere], // inclut automatiquement les pointures liées
+      include: [Pointure,Conjointe,Mere,Pere,Enfant,Soeur,Frere,Sport,Accident,Diplome,Filiere, { model: Note, as: 'Note' } ], // inclut automatiquement les pointures liées
     });
   }
 
   async function findByPk(id){
     return Eleve.findByPk(id,{
-        include:[Pointure,Conjointe,Mere,Pere,Enfant,Soeur,Frere,Sport,Accident,Diplome,Filiere],
+        include:[Pointure,Conjointe,Mere,Pere,Enfant,Soeur,Frere,Sport,Accident,Diplome,Filiere, { model: Note, as: 'Note' } ],
     })
   }
   async function deleteByPk(id) {
     
     // Récupérer l'élève avec toutes ses relations
     const eleve = await Eleve.findByPk(id, {
-      include: [Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere, Sport, Accident, Diplome, Filiere],
+      include: [Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere, Sport, Accident, Diplome, Filiere, { model: Note, as: 'Note' }],
     });
   
     if (!eleve) {
@@ -46,6 +47,7 @@ async function findAll() {
       eleve.Accident?.destroy(),
       eleve.Diplome?.destroy(),
       eleve.Filiere?.destroy(),
+      eleve.Note?.destroy(),
       ...((eleve.Enfants || []).map(e => e.destroy())),
       ...((eleve.Soeurs || []).map(s => s.destroy())),
       ...((eleve.Freres || []).map(f => f.destroy())),

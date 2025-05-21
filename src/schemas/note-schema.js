@@ -23,7 +23,19 @@ const noteSchema = sequelize.define("note",{
         finstage:{
             type :DataTypes.STRING,
             allowNull:true,
-        }
+        },
+        rangfinfetta:{
+          type:DataTypes.INTEGER,
+          allowNull:true,
+        },
+        rangmistage:{
+          type:DataTypes.INTEGER,
+          allowNull:true,
+        },
+        rangfinstage:{
+          type:DataTypes.INTEGER,
+          allowNull:true,
+        },
         
 });
 module.exports = noteSchema;

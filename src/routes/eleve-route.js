@@ -2,10 +2,8 @@ var express = require('express');
 var router = express.Router();
 
 
+const { upload } = require("../configs/global-config"); // le bon fichier
 
-const { storage } = require("../configs/global-config");
-var multer = require("multer");
-const upload = multer({ storage });
 
 var eleve_controller = require("../controllers/eleve-controler");
 

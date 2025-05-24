@@ -19,7 +19,7 @@ async function create(req, res, next) {
     const t = await DB.transaction(); // Commence une transaction
   try {
     //console.log(req.body);
-    //console.log(req.file);
+    //console.log("qsfsfqfqsfqsfqfqfqqsfqsfqsfqf",req.file);
      //pour l'image 
      const imageFile = req.file;
      // Chemin relatif 

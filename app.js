@@ -22,6 +22,8 @@ const sequelize = require('./src/data-access/database-connection');
 var permission_route = require('./src/routes/permission-route');
 const logRoutes = require("./src/routes/logs-route");
 const logMiddleware = require('./src/middlewares/logMiddleware');
+const importExcelRoute = require('./src/routes/importExcel');
+const dateServeur= require('./src/routes/date-route');
 const { log } = require("console");
 
 var app = express();
@@ -48,6 +50,10 @@ app.use("/api/pointures",Pointure_route);
 app.use("/api/spaSpeciale",spaSpeciale_route);
 app.use("/api/permission",permission_route);
 app.use("/api/note",note_route);
+app.use('/api/date', dateServeur);
+//excel
+
+app.use('/api/', importExcelRoute);
 
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 

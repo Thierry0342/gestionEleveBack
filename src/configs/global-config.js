@@ -16,10 +16,31 @@ const storage = multer.diskStorage({
     cb(null, eleveImage_dest);
   },
   filename: function (req, file, cb) {
-    cb(null, crypto.randomUUID() + ".jpg");
+    const ext = path.extname(file.originalname); // garde l'extension d’origine
+    cb(null, crypto.randomUUID() + ext);
+    
   },
 });
 
-const upload = multer({ storage });
 
-module.exports = upload;
+const upload = multer({ storage });
+//excelm
+const excel_dest = path.join(upload_dest, "excels");
+fs.mkdirSync(excel_dest, { recursive: true });
+
+const excelStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, excel_dest);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, crypto.randomUUID() + ext);
+  },
+});
+
+const uploadExcel = multer({ storage: excelStorage });
+
+module.exports = {
+  upload,      
+  uploadExcel   
+};

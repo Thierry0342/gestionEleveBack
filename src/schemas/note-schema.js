@@ -10,6 +10,7 @@ const noteSchema = sequelize.define("note",{
       eleveId:{
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique:true,
 
       },  
         finfetta:{

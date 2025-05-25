@@ -70,15 +70,15 @@ const Eleve = sequelize.define("Eleve", {
   },
   dateNaissance: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   lieuNaissance: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   situationFamiliale: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   sexe:{
     type:DataTypes.STRING,
@@ -100,7 +100,7 @@ const Eleve = sequelize.define("Eleve", {
   },
   genreConcours: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   telephone1: {
     type: DataTypes.STRING,

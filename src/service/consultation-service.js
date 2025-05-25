@@ -51,7 +51,7 @@ async function findConsultationByCour(cour) {
     include: [
       {
         model: Eleve,
-        attributes: ["id", "nom", "prenom", "matricule","escadron","peloton","numeroIncorporation"]
+        attributes: ["id", "nom", "prenom", "matricule","escadron","peloton","numeroIncorporation","image"]
       },
       {
         model: Cadre,

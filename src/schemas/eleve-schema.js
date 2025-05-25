@@ -58,6 +58,7 @@ const Eleve = sequelize.define("Eleve", {
   lieuDuplicata: {
     type: DataTypes.STRING,
     allowNull: true,
+    
   },
   numeroIncorporation: {
     type: DataTypes.STRING,
@@ -81,7 +82,7 @@ const Eleve = sequelize.define("Eleve", {
   },
   sexe:{
     type:DataTypes.STRING,
-    allowNull:false
+    allowNull:true
 
   },
   Specialiste:{

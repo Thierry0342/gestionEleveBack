@@ -120,7 +120,8 @@ const Eleve = sequelize.define("Eleve", {
   },
   religion : {
     type : DataTypes.STRING,
-    allowNull : false,
+    allowNull : true,
+    
   },
   niveau : {
     type : DataTypes.STRING,

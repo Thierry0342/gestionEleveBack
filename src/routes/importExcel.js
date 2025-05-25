@@ -49,6 +49,7 @@ router.post('/import-excel', uploadExcel.single('file'), async (req, res) => {
       genreConcours:row['GENRE CONCOURS'],
       situationFamiliale:row['SITUATION MATRIMONIALE'],
       niveau:row['DIPLOME'],
+      religion:row['RELIGION'],
 
       //pointure
       tailleChemise:row['TAILLECHEMISE'],

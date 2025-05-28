@@ -14,7 +14,7 @@ const EnfantSchema = sequelize.define("Enfant",{
       },
         nom: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
      
 

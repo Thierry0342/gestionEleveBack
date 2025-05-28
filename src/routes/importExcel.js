@@ -271,6 +271,55 @@ router.post('/import-absences', uploadExcel.single('file'), async (req, res) => 
     res.status(500).json({ message: "Erreur pendant l'import des absences", error: err.message });
   }
 });
+//foko sexe 
+router.post('/import-foko', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    let elevesModifies = 0;
+    const cour = 79;
+
+    for (const row of rawData) {
+      const numeroIncorporation = row['NR'];
+      const sexe = row['SEXE'];
+      const fady = row['FOKO'];
+
+      // Validation simple
+      if (!numeroIncorporation || !sexe || !fady) {
+        console.log(`Données incomplètes pour NR=${numeroIncorporation}`);
+        continue;
+      }
+
+      const eleve = await Eleve.findOne({
+        where: { numeroIncorporation, cour }
+      });
+
+      if (!eleve) {
+        console.log(`Aucun élève trouvé pour NR=${numeroIncorporation}, cour=${cour}`);
+        continue;
+      }
+
+      // Mise à jour des champs
+      await eleve.update({ sexe, fady });
+      elevesModifies++;
+    }
+
+    res.status(200).json({
+      message: 'Mise à jour des élèves réussie',
+      updated: elevesModifies
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Erreur lors de l'import",
+      error: err.message
+    });
+  }
+});
+
 
 
 module.exports = router;

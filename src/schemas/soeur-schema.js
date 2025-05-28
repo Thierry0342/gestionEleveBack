@@ -14,7 +14,7 @@ const SoeurSchema = sequelize.define("Soeur",{
       },
         nom: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         }
     
 

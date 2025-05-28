@@ -4,6 +4,7 @@ const { uploadExcel } = require('../configs/global-config');
 const Eleve = require('../schemas/eleve-schema'); // Ton modèle
 const Pointure =require('../schemas/pointure-schema');
 const Note=require('../schemas/note-schema');
+const Absence =require('../schemas/absence-schema');
 
 const router = express.Router();
 
@@ -178,6 +179,80 @@ router.post('/import-notes', uploadExcel.single('file'), async (req, res) => {
     res.status(500).json({ message: "Erreur pendant l'import des notes", error: err.message });
   }
 });
+//import absence 
+router.post('/import-absences', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    // Nettoie les clés (ex: " DATE ABS" devient "DATE ABS")
+    function cleanKeys(obj) {
+      const cleaned = {};
+      for (const key in obj) {
+        cleaned[key.trim()] = obj[key];
+      }
+      return cleaned;
+    }
+
+    // Formate une date Excel ou une chaîne
+    function formatDate(value) {
+      if (typeof value === 'number') {
+        const jsDate = new Date((value - 25569) * 86400 * 1000);
+        const year = jsDate.getFullYear();
+        const month = String(jsDate.getMonth() + 1).padStart(2, '0');
+        const day = String(jsDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+
+      if (typeof value === 'string') {
+        const parts = value.split('/');
+        if (parts.length !== 3) return null;
+        const [day, month, year] = parts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+
+      return null;
+    }
+
+    let absencesImportees = 0;
+    const cour = 79; // À adapter selon le contexte
+
+    for (const rawRow of rawData) {
+      const row = cleanKeys(rawRow); // nettoie les clés
+      const numeroIncorporation = row['INC'];
+      const dateAbs = formatDate(row['DATE ABS']);
+      const motif = row['MOTIF'];
+
+      if (!numeroIncorporation || !dateAbs || !motif) {
+        console.log(`Ligne incomplète : ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      const eleve = await Eleve.findOne({ where: { numeroIncorporation, cour } });
+
+      if (!eleve) {
+        console.log(`Aucun élève trouvé pour INC=${numeroIncorporation}`);
+        continue;
+      }
+
+      await Absence.create({
+        eleveId: eleve.id,
+        date: dateAbs,
+        motif: motif
+      });
+
+      absencesImportees++;
+    }
+
+    res.status(200).json({ message: 'Import des absences réussi', inserted: absencesImportees });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant l'import des absences", error: err.message });
+  }
+});
+
 
 module.exports = router;
 

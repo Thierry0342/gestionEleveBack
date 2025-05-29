@@ -223,12 +223,15 @@ async function create(req, res, next) {
 // get all eleve G
 async function getAll(req, res) {
   try {
-    const eleves = await eleve_service.findAll();
+    const limit = parseInt(req.query.limit) || 500;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const eleves = await eleve_service.findAll({ limit, offset });
 
     const hostUrl = `${req.protocol}://${req.get('host')}`;
 
     const elevesWithImage = eleves.map(eleve => {
-      const plainEleve = eleve.toJSON(); // conversion ici
+      const plainEleve = eleve.toJSON();
       return {
         ...plainEleve,
         image: plainEleve.image ? `${hostUrl}${plainEleve.image}` : null
@@ -241,6 +244,7 @@ async function getAll(req, res) {
     res.status(500).json({ message: error.message });
   }
 }
+
 
 
   async function deleteByPk(req,res,next) {

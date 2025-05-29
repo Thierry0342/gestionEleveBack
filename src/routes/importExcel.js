@@ -319,6 +319,74 @@ router.post('/import-foko', uploadExcel.single('file'), async (req, res) => {
     });
   }
 });
+//parent
+router.post('/import-parents', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    let totalAjoutes = 0;
+
+    for (const row of rawData) {
+      const numeroIncorporation = row['NumInc'];
+      const lienParente = row['LienParenté']?.toUpperCase()?.trim();
+      const nomParent = row['NomParent'];
+      const adresseParent = row['adresseParent'] || null;
+      const telParent = row['TelParent'] || null;
+
+      if (!numeroIncorporation || !lienParente || !nomParent) {
+        console.log(`Données incomplètes : ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      const eleve = await Eleve.findOne({ where: { numeroIncorporation: numeroIncorporation } });
+      if (!eleve) {
+        console.log(`Élève introuvable pour NumInc=${numeroIncorporation}`);
+        continue;
+      }
+
+      const eleveId = eleve.id;
+
+      switch (lienParente) {
+        case 'PERE':
+          await Pere.create({ eleveId, nom: nomParent, adresse: adresseParent, phone: telParent });
+          totalAjoutes++;
+          break;
+        case 'MERE':
+          await Mere.create({ eleveId, nom: nomParent, adresse: adresseParent, phone: telParent });
+          totalAjoutes++;
+          break;
+        case 'CONJOINTE':
+          await Conjointe.create({ eleveId, nom: nomParent, adresse: adresseParent, phone: telParent });
+          totalAjoutes++;
+          break;
+        case 'FRERE':
+          await Frere.create({ eleveId, nom: nomParent });
+          totalAjoutes++;
+          break;
+        case 'SOEUR':
+          await Soeur.create({ eleveId, nom: nomParent });
+          totalAjoutes++;
+          break;
+        default:
+          console.log(`LienParenté non reconnu : ${lienParente}`);
+      }
+    }
+
+    res.status(200).json({
+      message: 'Importation terminée',
+      totalAjoutes,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Erreur lors de l'import",
+      error: err.message
+    });
+  }
+});
 
 
 

@@ -16,9 +16,12 @@ const { where } = require("sequelize");
 async function create(eleve , options ={}){
     return Eleve.create(eleve,options) //option contien transaction
 }
-async function findAll() {
+async function findAll({ limit = 500, offset = 0 }) {
     return Eleve.findAll({
-      include: [Pointure,Conjointe,Mere,Pere,Enfant,Soeur,Frere,Sport,Accident,Diplome,Filiere, { model: Note, as: 'Note' } ], // inclut automatiquement les pointures liées
+      limit,
+      offset,
+      include: [Pointure,Conjointe,Mere,Pere,Enfant,Soeur,Frere,Sport,Accident,Diplome,Filiere, { model: Note, as: 'Note' } ],
+      order: [['id', 'ASC']], // inclut automatiquement les pointures liées
     });
   }
 

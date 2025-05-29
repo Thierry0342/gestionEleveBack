@@ -29,7 +29,7 @@ const CadreChema = sequelize.define("Cadre",{
         allowNull: true,
       },
       phone:{
-        type:DataTypes.INTEGER,
+        type:DataTypes.STRING,
         allowNull:true,
 
       }

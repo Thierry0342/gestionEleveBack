@@ -15,6 +15,7 @@ const Diplome = require ("../schemas/diplome-schema");
 const Filiere = require ("../schemas/filiere-schema")
 const Note=require('../schemas/note-schema');
 const Absence =require('../schemas/absence-schema');
+const Cadre=require('../schemas/cadre-schema');
 
 const router = express.Router();
 
@@ -387,6 +388,56 @@ router.post('/import-parents', uploadExcel.single('file'), async (req, res) => {
     });
   }
 });
+//cadre 
+router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    function cleanKeys(obj) {
+      const cleaned = {};
+      for (const key in obj) {
+        cleaned[key.trim()] = obj[key];
+      }
+      return cleaned;
+    }
+
+    let cadresImportes = 0;
+
+    for (const rawRow of rawData) {
+      const row = cleanKeys(rawRow);
+
+      const nom = row['NOM ET PRENOMS'];
+      const matricule = row['MLE'];
+      const grade = row['GRADE'];
+      const service = row['UNITE']; 
+      const phone = row['NR TPH'];
+
+      if (!nom || !matricule || !grade || !service) {
+        console.log(`Ligne incomplète : ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      await Cadre.create({
+        nom: nom.trim(),
+        matricule: String(matricule).trim(),
+        grade: grade.trim(),
+        service: service.trim(),
+        phone: phone
+      });
+
+      cadresImportes++;
+    }
+
+    res.status(200).json({ message: 'Import des cadres réussi', inserted: cadresImportes });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant l'import des cadres", error: err.message });
+  }
+});
+
 
 
 

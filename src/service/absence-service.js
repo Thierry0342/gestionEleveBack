@@ -3,8 +3,15 @@ const Eleve = require("../schemas/eleve-schema");
 
 // Créer une absence
 async function createAbsence(data) {
-  return Absence.create(data);
+  if (Array.isArray(data)) {
+    // Enregistrement multiple
+    return await Absence.bulkCreate(data);
+  } else {
+    // Enregistrement simple
+    return await Absence.create(data);
+  }
 }
+
 
 // Obtenir toutes les absences
 async function findAllAbsences() {

@@ -4,13 +4,18 @@ const absenceService = require("../service/absence-service");
 async function createAbsence(req, res) {
   try {
     const data = req.body;
-    const newAbsence = await absenceService.createAbsence(data);
-    res.status(201).json(newAbsence);
+
+    // Si c'est un tableau, on enregistre tous
+    const result = await absenceService.createAbsence(data);
+
+    res.status(201).json(result);
   } catch (error) {
+    console.error("Erreur lors de la création de l'absence:", error);
     res.status(500).json({ error: "Erreur lors de la création de l'absence" });
-    console.log(error);
   }
 }
+
+
 
 // Lister toutes les absences
 async function getAllAbsences(req, res) {

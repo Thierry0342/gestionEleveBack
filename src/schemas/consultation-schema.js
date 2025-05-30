@@ -41,7 +41,7 @@ const ConsultationSchema = sequelize.define("Consultation",{
 
         },
         phone:{
-            type :DataTypes.INTEGER,
+            type :DataTypes.STRING,
             allowNull:false,
 
         }  ,

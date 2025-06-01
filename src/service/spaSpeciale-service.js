@@ -5,6 +5,9 @@ const spaSpeciale = require("../schemas/spaSpeciale-schema");
 async function create(data) {
   return spaSpeciale.create(data);
 }
+async function createMany(dataArray) {
+  return spaSpeciale.insertMany(dataArray);
+}
 
 
 async function findAll() {
@@ -32,6 +35,7 @@ module.exports = {
     findAll,
     deletee,
     getById,
-    updateSpa
+    updateSpa,
+    createMany
   
 };

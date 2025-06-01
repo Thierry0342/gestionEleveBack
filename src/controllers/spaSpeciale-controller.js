@@ -10,19 +10,28 @@ async function getSpaSpeciale(req, res) {
         res.status(500).json({ message: "erreur" });
     }
 }
-async function createSpa(req,res){
-    const data=req.body;
+async function createSpa(req, res) {
+    const data = req.body;
+  
     try {
-       const resp= await spaSpecialeService.create(data);
-        res.json(resp)
-        
+      let result;
+  
+      if (Array.isArray(data)) {
+        // Si c’est un tableau, on insère plusieurs entrées
+        result = await spaSpecialeService.createMany(data);
+      } else {
+        // Sinon, on insère une seule entrée
+        result = await spaSpecialeService.create(data);
+      }
+  
+      res.json(result);
+  
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "erreur" });
-        
+      console.error("Erreur dans createSpa:", error);
+      res.status(500).json({ message: "Erreur lors de l'enregistrement des SPA." });
     }
-
-}
+  }
+  
 async function deleteSpa(req,res,params){
     const id=req.params.id;
     try {

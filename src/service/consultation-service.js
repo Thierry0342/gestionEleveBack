@@ -55,7 +55,7 @@ async function findConsultationByCour(cour) {
       },
       {
         model: Cadre,
-        attributes: ["id", "nom", "grade","phone"]
+        attributes: ["id", "nom", "grade","phone","service"]
       }
     ]
   });

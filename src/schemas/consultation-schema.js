@@ -55,6 +55,12 @@ const ConsultationSchema = sequelize.define("Consultation",{
             allowNull:false,
             defaultValue:"en cours de traitement...",
 
+        },
+        hospitalise :{
+            type :DataTypes.BOOLEAN,
+            allowNull:false,
+            defaultValue:false,
+
         }
 
 

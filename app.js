@@ -23,6 +23,7 @@ const logRoutes = require("./src/routes/logs-route");
 const logMiddleware = require('./src/middlewares/logMiddleware');
 const importExcelRoute = require('./src/routes/importExcel');
 const dateServeur= require('./src/routes/date-route');
+const gardeMalade = require('./src/routes/gardeMalade-route');
 const { log } = require("console");
 
 var app = express();
@@ -52,19 +53,22 @@ app.use("/api/permission",permission_route);
 app.use("/api/note",note_route);
 app.use('/api/date', dateServeur);
 app.use('/api/', importExcelRoute);
+app.use('/api/gardeMalade', gardeMalade)
 
 // ** IMPORTANT : servir les images AVANT le React SPA **
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 
 // Association et synchronisation BDD
 require("./src/schemas/association");
-DB.sync()
+DB.sync({ alter: true })
   .then(() => {
-    log("Database updated");
+    console.log("✅ Database synchronized");
   })
   .catch((err) => {
-    log(err);
+    console.error("❌ Database sync error:", err.message);
+    console.error(err); // affiche le stack trace complet
   });
+
 
 // Servir le front React/Vite (SPA)
 app.use(express.static(path.join(__dirname, '../EleveGendarmeFrontvite/dist')));

@@ -495,7 +495,63 @@ router.post('/import-matricules', uploadExcel.single('file'), async (req, res) =
   }
 });
 
+//mandefa numero phone 
+router.post('/import-numero', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
 
+    function cleanKeys(obj) {
+      const cleaned = {};
+      for (const key in obj) {
+        cleaned[key.trim()] = obj[key];
+      }
+      return cleaned;
+    }
+
+    let lignesModifiees = 0;
+    const coursId = 79;
+
+    for (const rawRow of rawData) {
+      const row = cleanKeys(rawRow);
+
+      const numero = row['TPH TENA IZY'];
+      const matricule = row['MLE'];
+
+      if (!numero || !matricule) {
+        console.log(`Ligne incomplète : ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      // Mise à jour de l'élève correspondant
+      const [updated] = await Eleve.update(
+        { telephone1: numero },
+        {
+          where: {
+            matricule: String(matricule).trim(),
+            cour: coursId
+          }
+        }
+      );
+
+      if (updated > 0) {
+        lignesModifiees++;
+      } else {
+        console.warn(`Aucun élève trouvé pour MLE=${matricule} (cours=${coursId})`);
+      }
+    }
+
+    res.status(200).json({
+      message: 'Mise à jour des matricules réussie',
+      updated: lignesModifiees
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant l'import", error: err.message });
+  }
+});
 
 
 module.exports = router;

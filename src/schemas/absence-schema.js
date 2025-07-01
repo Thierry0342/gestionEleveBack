@@ -19,6 +19,15 @@ const AbsenceShemaa = sequelize.define("Absence",{
         motif :{
           type :DataTypes.STRING,
           allowNull:false,
+        },
+        lieuPerm:{
+          type:DataTypes.STRING,
+          allowNull:true
+        },
+        motifPerm:{
+          type:DataTypes.STRING,
+          allowNull:true
+
         }
         
 });

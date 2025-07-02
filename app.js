@@ -71,14 +71,14 @@ DB.sync({ alter: true })
 
 
 // Servir le front React/Vite (SPA)
-app.use(express.static(path.join(__dirname, '../EleveGendarmeFrontvite/dist')));
+app.use(express.static(path.join(__dirname, '../eleveGendarmeFrontVite/dist')));
 
 // ** Ne pas intercepter les routes /data/uploads et /api dans ce fallback SPA **
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/data/uploads') || req.path.startsWith('/api')) {
     return next(); // laisse Express gérer ces routes
   }
-  res.sendFile(path.join(__dirname, '../EleveGendarmeFrontvite/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../eleveGendarmeFrontVite/dist/index.html'));
 });
 
 // catch 404 and forward to error handler

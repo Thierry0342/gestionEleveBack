@@ -267,7 +267,7 @@ async function getAll(req, res) {
       const { id } = req.params;
       let updatedData = req.body;
   
-      // ⬇️ Ajoute ici la fonction utilitaire pour parser les champs JSON
+      // la fonction utilitaire pour parser les champs JSON
       function parseIfJson(field) {
         try {
           if (typeof field === "string") {

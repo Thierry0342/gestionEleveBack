@@ -98,6 +98,11 @@ const Eleve = sequelize.define("Eleve", {
     type: DataTypes.STRING, // Chemin ou URL
     allowNull: true,
   },
+  niveaufiliere:{
+    type: DataTypes.STRING,
+    allowNull: true,
+
+  },
   genreConcours: {
     type: DataTypes.STRING,
     allowNull: true,

@@ -75,118 +75,115 @@ async function findAll({ limit = 500, offset = 0 }) {
         return null;
       }
     }
-    
+  
     // Parse les champs complexes
     updatedData.famille = parseIfJson(updatedData.famille);
     updatedData.sports = parseIfJson(updatedData.sports);
     updatedData.Diplome = parseIfJson(updatedData.Diplome);
     updatedData.Filiere = parseIfJson(updatedData.Filiere);
     updatedData.Pointure = parseIfJson(updatedData.Pointure);
-    
-    // Récupérer l'élève avec toutes ses relations
+  
     const eleve = await Eleve.findByPk(id, {
       include: [Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere, Sport, Accident, Diplome, Filiere],
       transaction: options.transaction
     });
-
+  
     if (!eleve) {
       throw new Error(`Élève avec l'ID ${id} non trouvé`);
     }
-
-    // Mettre à jour les données de l'élève
+  
     await eleve.update(updatedData, { transaction: options.transaction });
-
-    // Mettre à jour ses relations (si présentes dans les données reçues)
-   
+  
+    // POINTURE
     if (updatedData.Pointure) {
-      await Pointure.update(updatedData.Pointure, { where: { eleveId: id }, transaction: options.transaction });
+      const exist = await Pointure.findOne({ where: { eleveId: id }, transaction: options.transaction });
+      if (exist) {
+        await Pointure.update(updatedData.Pointure, { where: { eleveId: id }, transaction: options.transaction });
+      } else {
+        await Pointure.create({ ...updatedData.Pointure, eleveId: id }, { transaction: options.transaction });
+      }
     }
-
+  
+    // FAMILLE
     if (updatedData.famille) {
       const familleData = updatedData.famille;
-
-      if (familleData.conjointe) {
-        await Conjointe.update(familleData.conjointe,{ where: { eleveId: id }, transaction: options.transaction });
+  
+      const updateOrCreate = async (Model, data) => {
+        const exist = await Model.findOne({ where: { eleveId: id }, transaction: options.transaction });
+        if (exist) {
+          await Model.update(data, { where: { eleveId: id }, transaction: options.transaction });
+        } else {
+          await Model.create({ ...data, eleveId: id }, { transaction: options.transaction });
+        }
+      };
+  
+      if (familleData.conjointe) await updateOrCreate(Conjointe, familleData.conjointe);
+      if (familleData.mere) await updateOrCreate(Mere, familleData.mere);
+      if (familleData.pere) await updateOrCreate(Pere, familleData.pere);
+      if (familleData.accident) await updateOrCreate(Accident, familleData.accident);
+  
+      // ENFANTS
+      if (familleData.enfants) {
+        const enfantsActuels = await Enfant.findAll({ where: { eleveId: id }, transaction: options.transaction });
+        const idsReçus = familleData.enfants.filter(e => e.id).map(e => e.id);
+  
+        for (const enfant of enfantsActuels) {
+          if (!idsReçus.includes(enfant.id)) {
+            await Enfant.destroy({ where: { id: enfant.id }, transaction: options.transaction });
+          }
+        }
+  
+        for (const enfant of familleData.enfants) {
+          if (enfant.id) {
+            await Enfant.update(enfant, { where: { id: enfant.id }, transaction: options.transaction });
+          } else {
+            await Enfant.create({ ...enfant, eleveId: id }, { transaction: options.transaction });
+          }
+        }
       }
-
-      if (familleData.mere) {
-        await Mere.update(familleData.mere, { where: { eleveId: id }, transaction: options.transaction });
+  
+      // SOEUR
+      if (familleData.soeur) {
+        const soeursActuelles = await Soeur.findAll({ where: { eleveId: id }, transaction: options.transaction });
+        const idsReçus = familleData.soeur.filter(s => s.id).map(s => s.id);
+  
+        for (const soeur of soeursActuelles) {
+          if (!idsReçus.includes(soeur.id)) {
+            await Soeur.destroy({ where: { id: soeur.id }, transaction: options.transaction });
+          }
+        }
+  
+        for (const soeur of familleData.soeur) {
+          if (soeur.id) {
+            await Soeur.update(soeur, { where: { id: soeur.id }, transaction: options.transaction });
+          } else {
+            await Soeur.create({ ...soeur, eleveId: id }, { transaction: options.transaction });
+          }
+        }
       }
-
-      if (familleData.pere) {
-        await Pere.update(familleData.pere, { where: { eleveId: id }, transaction: options.transaction });
+  
+      // FRERE
+      if (familleData.frere) {
+        const freresActuels = await Frere.findAll({ where: { eleveId: id }, transaction: options.transaction });
+        const idsReçus = familleData.frere.filter(f => f.id).map(f => f.id);
+  
+        for (const frere of freresActuels) {
+          if (!idsReçus.includes(frere.id)) {
+            await Frere.destroy({ where: { id: frere.id }, transaction: options.transaction });
+          }
+        }
+  
+        for (const frere of familleData.frere) {
+          if (frere.id) {
+            await Frere.update(frere, { where: { id: frere.id }, transaction: options.transaction });
+          } else {
+            await Frere.create({ ...frere, eleveId: id }, { transaction: options.transaction });
+          }
+        }
       }
-
-      if (familleData.accident) {
-        await Accident.update(familleData.accident, { where: { eleveId: id }, transaction: options.transaction });
-      }
-      console.log("********,",familleData.enfants)
-      // Gérer les enfants
-if (familleData.enfants) {
-  const enfantsActuels = await Enfant.findAll({ where: { eleveId: id }, transaction: options.transaction });
-
-  const idsReçus = familleData.enfants.filter(e => e.id).map(e => e.id);
-
-  // 1. Supprimer ceux qui ne sont plus dans la liste
-  for (const enfant of enfantsActuels) {
-    if (!idsReçus.includes(enfant.id)) {
-      await Enfant.destroy({ where: { id: enfant.id }, transaction: options.transaction });
     }
-  }
-
-  // 2. Créer ou mettre à jour les enfants
-  for (const enfant of familleData.enfants) {
-    if (enfant.id) {
-      await Enfant.update(enfant, { where: { id: enfant.id }, transaction: options.transaction });
-    } else {
-      await Enfant.create({ ...enfant, eleveId: id }, { transaction: options.transaction });
-    }
-  }
-}
-//soeur
-if (familleData.soeur) {
-  const soeursActuelles = await Soeur.findAll({ where: { eleveId: id }, transaction: options.transaction });
-  const idsReçus = familleData.soeur.filter(s => s.id).map(s => s.id);
-
-  for (const soeur of soeursActuelles) {
-    if (!idsReçus.includes(soeur.id)) {
-      await Soeur.destroy({ where: { id: soeur.id }, transaction: options.transaction });
-    }
-  }
-
-  for (const soeur of familleData.soeur) {
-    if (soeur.id) {
-      await Soeur.update(soeur, { where: { id: soeur.id }, transaction: options.transaction });
-    } else {
-      await Soeur.create({ ...soeur, eleveId: id }, { transaction: options.transaction });
-    }
-  }
-}
-if (familleData.frere) {
-  const freresActuels = await Frere.findAll({ where: { eleveId: id }, transaction: options.transaction });
-  const idsReçus = familleData.frere.filter(f => f.id).map(f => f.id);
-
-  for (const frere of freresActuels) {
-    if (!idsReçus.includes(frere.id)) {
-      await Frere.destroy({ where: { id: frere.id }, transaction: options.transaction });
-    }
-  }
-
-  for (const frere of familleData.frere) {
-    if (frere.id) {
-      await Frere.update(frere, { where: { id: frere.id }, transaction: options.transaction });
-    } else {
-      await Frere.create({ ...frere, eleveId: id }, { transaction: options.transaction });
-    }
-  }
-}
-
-
-
-      
-    }
-
-    // Mise à jour des sports
+  
+    // SPORTS
     if (updatedData.sports) {
       const sportPayload = {
         eleveId: id,
@@ -198,15 +195,20 @@ if (familleData.frere) {
         ArtsMartiaux: false,
         Autre: false,
       };
-
+  
       updatedData.sports.forEach(sport => {
         if (sport) sportPayload[sport] = true;
       });
-
-      await Sport.update(sportPayload, { where: { eleveId: id }, transaction: options.transaction });
+  
+      const exist = await Sport.findOne({ where: { eleveId: id }, transaction: options.transaction });
+      if (exist) {
+        await Sport.update(sportPayload, { where: { eleveId: id }, transaction: options.transaction });
+      } else {
+        await Sport.create(sportPayload, { transaction: options.transaction });
+      }
     }
-
-    // Mise à jour des diplômes
+  
+    // DIPLOME
     if (updatedData.Diplome && typeof updatedData.Diplome === 'object') {
       const diplomePayload = {
         eleveId: id,
@@ -214,29 +216,40 @@ if (familleData.frere) {
         BEPC: false,
         BACC_S: false,
         BACC_L: false,
+        BACC_TECHNIQUE:false,
         Licence: false,
         MasterOne: false,
         MasterTwo: false,
         Doctorat: false,
       };
-    
-      // Met à jour les champs à true là où c’est vrai dans l’objet
+  
       for (const [key, value] of Object.entries(updatedData.Diplome)) {
         if (diplomePayload.hasOwnProperty(key) && value === true) {
           diplomePayload[key] = true;
         }
       }
-    
-      await Diplome.update(diplomePayload, { where: { eleveId: id }, transaction: options.transaction });
+  
+      const exist = await Diplome.findOne({ where: { eleveId: id }, transaction: options.transaction });
+      if (exist) {
+        await Diplome.update(diplomePayload, { where: { eleveId: id }, transaction: options.transaction });
+      } else {
+        await Diplome.create(diplomePayload, { transaction: options.transaction });
+      }
     }
-
-    // Mise à jour de la filière
+  
+    // FILIERE
     if (updatedData.Filiere) {
-      await Filiere.update(updatedData.Filiere, { where: { eleveId: id }, transaction: options.transaction });
+      const exist = await Filiere.findOne({ where: { eleveId: id }, transaction: options.transaction });
+      if (exist) {
+        await Filiere.update(updatedData.Filiere, { where: { eleveId: id }, transaction: options.transaction });
+      } else {
+        await Filiere.create({ ...updatedData.Filiere, eleveId: id }, { transaction: options.transaction });
+      }
     }
-
+  
     return eleve;
-}
+  }
+  
 
 // Fonction pour trouver un élève
 async function findByIncorporation({ incorporation, cour }) {

@@ -33,6 +33,12 @@ const DiplomeSchema = sequelize.define("Diplome",{
         allowNull : true,
         defaultValue : false,
       },
+      BACC_TECHNIQUE:{
+        type : DataTypes.BOOLEAN,
+        allowNull : true,
+        defaultValue : false,
+
+      },
       Licence:{
         type : DataTypes.BOOLEAN,
         allowNull : true,

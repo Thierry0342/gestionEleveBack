@@ -24,6 +24,18 @@ const SportSchema = sequelize.define("Sport",{
         defaultValue : false,
         
       },
+      Rugby:{
+        type : DataTypes.BOOLEAN,
+        allowNull : true,
+        defaultValue : false,
+        
+      },
+      Musculation:{
+        type : DataTypes.BOOLEAN,
+        allowNull : true,
+        defaultValue : false,
+
+      },
       Volley_ball:{
         type : DataTypes.BOOLEAN,
         allowNull : true,

@@ -189,6 +189,8 @@ async function findAll({ limit = 500, offset = 0 }) {
         eleveId: id,
         Football: false,
         Basketball: false,
+        Musculation:false,
+        Rugby:false,
         Volley_ball: false,
         Athletisme: false,
         Tennis: false,

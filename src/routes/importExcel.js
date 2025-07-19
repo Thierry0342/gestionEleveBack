@@ -14,6 +14,7 @@ const Sport = require ("../schemas/sport-schema");
 const Diplome = require ("../schemas/diplome-schema");
 const Filiere = require ("../schemas/filiere-schema")
 const Note=require('../schemas/note-schema');
+const NoteFrancais=require('../schemas/noteFrancais-schema');
 const Absence =require('../schemas/absence-schema');
 const Cadre=require('../schemas/cadre-schema');
 
@@ -546,6 +547,87 @@ router.post('/import-numero', uploadExcel.single('file'), async (req, res) => {
     res.status(200).json({
       message: 'Mise à jour des matricules réussie',
       updated: lignesModifiees
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant l'import", error: err.message });
+  }
+});
+//note francais 
+
+router.post('/import-notefrancais', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    function cleanKeys(obj) {
+      const cleaned = {};
+      for (const key in obj) {
+        cleaned[key.trim()] = obj[key];
+      }
+      return cleaned;
+    }
+
+    let lignesModifiees = 0;
+    let lignesCreees = 0;
+    let lignesEchouees = [];
+    const coursId = 79;
+
+    for (const rawRow of rawData) {
+      const row = cleanKeys(rawRow);
+
+      const inc = row['INC'];
+      const niveau = row['NIVEAU'];
+      const note = row['NOTE']; // Optionnelle
+
+      if (!inc || !niveau) {
+        lignesEchouees.push({ row, reason: 'INC ou NIVEAU manquant' });
+        continue;
+      }
+
+      // Chercher l'élève
+      const eleve = await Eleve.findOne({
+        where: {
+          numeroIncorporation: String(inc).trim(),
+          cour: coursId
+        }
+      });
+
+      if (!eleve) {
+        lignesEchouees.push({ row, reason: `Aucun élève trouvé pour INC=${inc}` });
+        continue;
+      }
+
+      // Vérifier si une note existe déjà pour cet élève et ce niveau
+      const [noteRecord, created] = await NoteFrancais.findOrCreate({
+        where: {
+          eleveId: eleve.id,
+          niveau: String(niveau).trim()
+        },
+        defaults: {
+          note: note !== undefined && note !== '' ? Number(note) : null
+        }
+      });
+
+      if (!created) {
+        // Une note existait déjà, on la met à jour
+        await noteRecord.update({
+          note: note !== undefined && note !== '' ? Number(note) : null
+        });
+        lignesModifiees++;
+      } else {
+        lignesCreees++;
+      }
+    }
+
+    res.status(200).json({
+      message: 'Import des notes terminé',
+      inserted: lignesCreees,
+      updated: lignesModifiees,
+      failed: lignesEchouees.length,
+      details: lignesEchouees
     });
   } catch (err) {
     console.error(err);

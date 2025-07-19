@@ -17,6 +17,7 @@ var consultation_route=require("./src/routes/consultation-route");
 var Pointure_route = require("./src/routes/pointure-route");
 var spaSpeciale_route=require("./src/routes/spaSpeciale-route");
 var note_route=require("./src/routes/note-route");
+var notefrancais_route=require("./src/routes/notefrancais-route");
 const sequelize = require('./src/data-access/database-connection');
 var permission_route = require('./src/routes/permission-route');
 const logRoutes = require("./src/routes/logs-route");
@@ -54,6 +55,7 @@ app.use("/api/note",note_route);
 app.use('/api/date', dateServeur);
 app.use('/api/', importExcelRoute);
 app.use('/api/gardeMalade', gardeMalade)
+app.use("/api/notefrancais",notefrancais_route);
 
 // ** IMPORTANT : servir les images AVANT le React SPA **
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));

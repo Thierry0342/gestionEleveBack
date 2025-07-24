@@ -110,13 +110,16 @@ async function findAll({ limit = 500, offset = 0 }) {
   
       const updateOrCreate = async (Model, data) => {
         const exist = await Model.findOne({ where: { eleveId: id }, transaction: options.transaction });
+      
+        const { id: _ignoredId, ...dataSansId } = data; // Ignore le champ 'id'
+      
         if (exist) {
-          await Model.update(data, { where: { eleveId: id }, transaction: options.transaction });
+          await Model.update(dataSansId, { where: { eleveId: id }, transaction: options.transaction });
         } else {
-          await Model.create({ ...data, eleveId: id }, { transaction: options.transaction });
+          await Model.create({ ...dataSansId, eleveId: id }, { transaction: options.transaction });
         }
       };
-  
+      
       if (familleData.conjointe) await updateOrCreate(Conjointe, familleData.conjointe);
       if (familleData.mere) await updateOrCreate(Mere, familleData.mere);
       if (familleData.pere) await updateOrCreate(Pere, familleData.pere);

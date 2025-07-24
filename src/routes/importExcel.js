@@ -1,6 +1,8 @@
 const express = require('express');
+const path = require('path');
 const XLSX = require('xlsx');
-const { uploadExcel } = require('../configs/global-config');
+const { uploadExcel, upload } = require('../configs/global-config');
+const fs = require('fs');
 const Eleve = require('../schemas/eleve-schema'); // Ton modèle
 const Pointure =require('../schemas/pointure-schema');
 const Conjointe = require("../schemas/conjointe-schema")
@@ -632,6 +634,118 @@ router.post('/import-notefrancais', uploadExcel.single('file'), async (req, res)
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Erreur pendant l'import", error: err.message });
+  }
+});
+//repartion cadre
+router.post('/importrepartitioncadres', uploadExcel.single('file'), async (req, res) => {
+  try {
+    // Lire le fichier importé
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    // Nettoyer et structurer
+    const cadres = rawData.map(row => ({
+      grade: row['GRADE'],
+      nom: row['NOM ET PRENOMS'] || row['M ET PRENOM'],
+      mle: row['MLE'],
+      tph: row['NR TPH'],
+      unite: row['UNITE'],
+    }));
+
+    // Fonction shuffle
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Grouper par type et mélanger
+    const groupe1 = shuffle(cadres.filter(c => ['GP1C', 'GP2C', 'GPHC'].includes(c.grade)));
+    const groupe2 = shuffle(cadres.filter(c => ['GST', 'G1C', 'G2C', 'GHC'].includes(c.grade)));
+
+    // Répartition ESC / PON
+    const repartition = [];
+
+    for (let esc = 1; esc <= 10; esc++) {
+      for (let pon = 1; pon <= 3; pon++) {
+        const cadre1 = groupe1.shift();
+        const cadre2 = groupe2.shift();
+
+        if (cadre1) {
+          cadre1.esc = esc;
+          cadre1.pon = pon;
+          repartition.push(cadre1);
+        }
+
+        if (cadre2) {
+          cadre2.esc = esc;
+          cadre2.pon = pon;
+          repartition.push(cadre2);
+        }
+      }
+    }
+
+    // Cadres restants à reprendre
+    groupe1.forEach(c => {
+      repartition.push({ ...c, esc: 'À reprendre', pon: '' });
+    });
+    groupe2.forEach(c => {
+      repartition.push({ ...c, esc: 'À reprendre', pon: '' });
+    });
+
+    // Trier par ESC puis PON
+    repartition.sort((a, b) => {
+      if (a.esc === 'À reprendre') return 1; // Mettre les 'À reprendre' à la fin
+      if (b.esc === 'À reprendre') return -1;
+      if (a.esc !== b.esc) return a.esc - b.esc;
+      return a.pon - b.pon;
+    });
+
+    // Ajouter NR auto-incrémenté
+    const repartitionFinale = repartition.map((c, index) => ({
+      NR: index + 1,
+      GRADE: c.grade,
+      'NOM ET PRENOMS': c.nom,
+      MLE: c.mle,
+      'NR TPH': c.tph,
+      UNITE: c.unite,
+      ESC: c.esc,
+      PON: c.pon
+    }));
+
+    // Générer le fichier Excel
+    const ws = XLSX.utils.json_to_sheet(repartitionFinale);
+    
+    const newWorkbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(newWorkbook, ws, 'Répartition');
+
+    // Vérifier / créer le dossier output
+    const outputDir = path.join(__dirname, '../outputs');
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir);
+    }
+
+    const outputPath = path.join(outputDir, 'repartition_finale.xlsx');
+    XLSX.writeFile(newWorkbook, outputPath);
+
+    // Supprimer le fichier uploadé
+    fs.unlinkSync(req.file.path);
+
+    res.status(200).json({
+      message: 'Répartition terminée avec succès',
+      download: '/api/download-repartition'
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: 'Erreur pendant la répartition',
+      error: err.message
+    });
   }
 });
 

@@ -25,6 +25,7 @@ const logMiddleware = require('./src/middlewares/logMiddleware');
 const importExcelRoute = require('./src/routes/importExcel');
 const dateServeur= require('./src/routes/date-route');
 const gardeMalade = require('./src/routes/gardeMalade-route');
+const sanctionRoute = require('./src/routes/sanction-routes');
 const { log } = require("console");
 
 var app = express();
@@ -56,6 +57,7 @@ app.use('/api/date', dateServeur);
 app.use('/api/', importExcelRoute);
 app.use('/api/gardeMalade', gardeMalade)
 app.use("/api/notefrancais",notefrancais_route);
+app.use("/api/sanctions",sanctionRoute);
 
 // ** IMPORTANT : servir les images AVANT le React SPA **
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));

@@ -11,7 +11,7 @@ async function createAbsence(data) {
     return await Absence.create(data);
   }
 }
-
+//
 
 // Obtenir toutes les absences
 async function findAllAbsences() {

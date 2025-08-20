@@ -12,6 +12,7 @@ const Diplome = require ("./diplome-schema");
 const Filiere = require ("./filiere-schema")
 //absence
 const Absence = require ("./absence-schema");
+const Sanction = require("./sanctions-schemas");
 //consultation
 const Cadre = require("./cadre-schema");
 const Consultation = require ("./consultation-schema");
@@ -81,5 +82,8 @@ Note.belongsTo(Eleve, { foreignKey: "eleveId" });
 //
 Eleve.hasOne(NoteFrancais, { foreignKey: 'eleveId'});
 NoteFrancais.belongsTo(Eleve, { foreignKey: "eleveId" });
+//
+Eleve.hasMany(Sanction, { foreignKey: "eleveId" });
+Sanction.belongsTo(Eleve, { foreignKey: "eleveId" });
 
 module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre,User,Log,Permission,Note,NoteFrancais};

@@ -65,7 +65,16 @@ async function findConsultationByCour(cour) {
 async function updateConsultation(id, data) {
   return Consultation.update(data, { where: { id } });
 }
-
+async function findConsultationsByEleveId(eleveId) {
+  return Consultation.findAll({
+    where: { eleveId },
+    include: [
+      { model: Eleve, attributes: ["id","nom","prenom","numeroIncorporation","escadron","peloton"] },
+      { model: Cadre, attributes: ["id","nom","prenom","grade","phone","service"] }
+    ],
+    order: [["id","DESC"]],
+  });
+}
 
 module.exports = {
   createConsultation,
@@ -73,5 +82,6 @@ module.exports = {
   deleteConsultation,
   findConsultationById,
   updateConsultation,
-  findConsultationByCour
+  findConsultationByCour,
+  findConsultationsByEleveId
 };

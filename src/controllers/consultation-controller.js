@@ -78,12 +78,21 @@ async function updateConsultation(req, res) {
     res.status(500).json({ error: "Erreur lors de la mise à jour de la consultation" });
   }
 }
-
+async function getConsultationsByEleveId(req, res) {
+  try {
+    const rows = await consultationService.findConsultationsByEleveId(req.params.eleveId);
+    res.json(rows);
+  } catch (error) {
+    console.error("getConsultationsByEleveId:", error);
+    res.status(500).json({ error: "Erreur lors de la récupération par élève" });
+  }
+}
 module.exports = {
   createConsultation,
   getAllConsultations,
   deleteConsultation,
   getConsultationById,
   updateConsultation,
+  getConsultationsByEleveId,
   getfindConsultationByCour
 };

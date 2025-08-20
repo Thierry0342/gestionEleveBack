@@ -86,4 +86,4 @@ NoteFrancais.belongsTo(Eleve, { foreignKey: "eleveId" });
 Eleve.hasMany(Sanction, { foreignKey: "eleveId" });
 Sanction.belongsTo(Eleve, { foreignKey: "eleveId" });
 
-module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre,User,Log,Permission,Note,NoteFrancais};
+module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre,User,Log,Permission,Note,NoteFrancais,Sanction};

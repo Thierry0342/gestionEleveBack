@@ -748,6 +748,102 @@ router.post('/importrepartitioncadres', uploadExcel.single('file'), async (req, 
     });
   }
 });
+//importe pointure 
+// pointure : NUM_INCORPORATION | POINTURE (chaussure) | TAILLEPATALON (pantalon)
+router.post('/import-pointures', uploadExcel.single('file'), async (req, res) => {
+  const tempPath = req?.file?.path;
+  try {
+    if (!tempPath) {
+      return res.status(400).json({ message: 'Fichier Excel manquant (champ "file").' });
+    }
+
+    const workbook = XLSX.readFile(tempPath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+    // Helpers
+    const cleanKeys = (obj) =>
+      Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.trim(), v]));
+
+    const pick = (obj, ...keys) => {
+      for (const k of keys) if (obj[k] !== undefined) return obj[k];
+      return undefined;
+    };
+
+    const normalizeSize = (v) => {
+      if (v === null || v === undefined) return null;
+      if (typeof v === 'number') return String(v);
+      const s = String(v).trim();
+      return s ? s.replace(',', '.') : null;
+    };
+
+    const cour = 79; // adapte si nécessaire
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    let noEleve = 0;
+
+    for (const rawRow of rawData) {
+      const row = cleanKeys(rawRow);
+
+      // On accepte NUM_INCORPORATION (normal) ou INC (fallback)
+      const numeroIncorporation = String(pick(row, 'NUM_INCORPORATION', 'INC') ?? '').trim();
+
+      // Excel -> DB (Pointure)
+      const pointureChaussure = normalizeSize(pick(row, 'POINTURE'));
+      const pointurePantalon  = normalizeSize(pick(row, 'TAILLEPATALON', 'TAILLEPANTALON'));
+
+      if (!numeroIncorporation) { skipped++; continue; }
+      if (!pointureChaussure && !pointurePantalon) { skipped++; continue; }
+
+      const whereEleve = { numeroIncorporation };
+      if (cour !== undefined && !Number.isNaN(cour)) whereEleve.cour = cour;
+
+      const eleve = await Eleve.findOne({ where: whereEleve });
+      if (!eleve) {
+        console.log(`Aucun élève pour NUM_INCORPORATION=${numeroIncorporation}${cour ? ' / cour=' + cour : ''}`);
+        noEleve++;
+        continue;
+      }
+
+      // Cherche la ligne Pointure liée à l'élève
+      const payload = {};
+      if (pointureChaussure) payload.pointureChaussure = pointureChaussure;
+      if (pointurePantalon)  payload.pointurePantalon  = pointurePantalon;
+
+      let rec = await Pointure.findOne({ where: { eleveId: eleve.id } });
+      if (rec) {
+        await rec.update(payload);
+        updated++;
+      } else {
+        await Pointure.create({ eleveId: eleve.id, ...payload });
+        inserted++;
+      }
+    }
+
+    res.status(200).json({
+      message: 'Import des pointures terminé',
+      rows: rawData.length,
+      inserted,
+      updated,
+      noEleve,
+      skipped
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant l'import des pointures", error: err.message });
+  } finally {
+    // Nettoyage du fichier temporaire
+    try {
+      // choisis l'une des deux lignes :
+      // fs.unlinkSync(tempPath);
+      await fs.promises.unlink(tempPath);
+    } catch {}
+  }
+});
+
 
 
 module.exports = router;

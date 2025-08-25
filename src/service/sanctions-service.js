@@ -23,7 +23,7 @@ async function findAllSanctions() {
     order: [["id", "DESC"]],
   });
 }
-
+//
 // Supprimer une sanction par ID
 async function deleteSanction(id) {
   return Sanction.destroy({ where: { id } });

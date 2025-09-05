@@ -20,6 +20,11 @@ const SpasPecialeSchema = sequelize.define("spaSpeciale",{
           type: DataTypes.INTEGER,
           allowNull: false,
           },
+        type:{
+          type:DataTypes.STRING,
+          allowNull:false,
+          defaultValue:'INDISPONIBLE',
+        },
         date: {
             type: DataTypes.DATEONLY,
             allowNull: false,

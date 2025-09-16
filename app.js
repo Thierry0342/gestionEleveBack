@@ -27,6 +27,7 @@ const dateServeur= require('./src/routes/date-route');
 const gardeMalade = require('./src/routes/gardeMalade-route');
 const sanctionRoute = require('./src/routes/sanction-routes');
 const detailsRoute = require('./src/routes/eleve-details-route');
+const patcRoute = require('./src/routes/patc-route');
 const { log } = require("console");
 
 var app = express();
@@ -60,6 +61,7 @@ app.use('/api/gardeMalade', gardeMalade)
 app.use("/api/notefrancais",notefrancais_route);
 app.use("/api/sanctions",sanctionRoute);
 app.use("/api/eleves",detailsRoute);
+app.use("/api/patc",patcRoute);
 
 // ** IMPORTANT : servir les images AVANT le React SPA **
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));

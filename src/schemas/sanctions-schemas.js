@@ -5,6 +5,7 @@ const SanctionSchema = sequelize.define("Sanction",
      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, },
       eleveId:{ type: DataTypes.INTEGER, allowNull: true, },
        sanction:{ type:DataTypes.BOOLEAN, allowNull:true, },
+       taux:{type:DataTypes.STRING,allowNull:true},
        motif: {
           type: DataTypes.TEXT, 
           allowNull: false,

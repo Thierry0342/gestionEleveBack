@@ -159,12 +159,12 @@ router.post('/import-notes', uploadExcel.single('file'), async (req, res) => {
 
     for (const row of rawData) {
       const numeroIncorporation = row['INC'];
-      const finfetta = parseFloat(row['MOYENNE']);
-      const rangfinfetta = parseInt(row['RANG'], 10);
+      const mistage = parseFloat(row['MOYENNE']);
+      const rangmistage = parseInt(row['RANG'], 10);
       const cour = 79;
 
       // Skip lignes invalides
-      if (isNaN(finfetta) || isNaN(rangfinfetta)) {
+      if (isNaN(mistage) || isNaN(rangmistage)) {
         console.log(`Données invalides pour INC=${numeroIncorporation}`);
         continue;
       }
@@ -181,15 +181,15 @@ router.post('/import-notes', uploadExcel.single('file'), async (req, res) => {
       if (noteExistante) {
         // Met à jour si déjà existante
         await noteExistante.update({
-          finfetta,
-          rangfinfetta
+          mistage,
+          rangmistage
         });
       } else {
         // Sinon crée une nouvelle note
         await Note.create({
           eleveId: eleve.id,
-          finfetta,
-          rangfinfetta
+          mistage,
+          rangmistage
         });
       }
 

@@ -18,7 +18,7 @@ async function findAllAbsences() {
     return Absence.findAll({
       include: {
         model: Eleve,
-        attributes: ["Id","nom", "prenom", "matricule", "escadron", "peloton","numeroIncorporation","cour"], 
+        attributes: ["Id","nom", "prenom", "matricule", "escadron", "peloton","numeroIncorporation","cour","image"], 
       },
     });
   }

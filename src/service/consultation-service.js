@@ -51,7 +51,7 @@ async function findConsultationByNumeroIncorporation(numeroIncorporation) {
       {
         model: Eleve,
         where: { numeroIncorporation },
-        attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation"]
+        attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation","image"]
       },
       {
         model: Cadre,

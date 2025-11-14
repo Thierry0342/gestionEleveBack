@@ -65,6 +65,25 @@ async function getfindConsultationByCour(req, res) {
     res.status(500).json({ error: "Erreur lors de la récupération de la consultation" });
   }
 }
+//by incorporation
+async function getConsultationByNumeroIncorporation(req, res) {
+  try {
+    const numeroIncorporation = req.params.numeroIncorporation;
+
+    const consultations = await consultationService.findConsultationByNumeroIncorporation(numeroIncorporation);
+
+    if (!consultations || consultations.length === 0) {
+      return res.status(404).json({ error: "Aucune consultation trouvée" });
+    }
+
+    res.json(consultations);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur serveur lors de la recherche" });
+  }
+}
+
 
 // Mettre à jour une consultation
 async function updateConsultation(req, res) {
@@ -94,5 +113,6 @@ module.exports = {
   getConsultationById,
   updateConsultation,
   getConsultationsByEleveId,
-  getfindConsultationByCour
+  getfindConsultationByCour,
+  getConsultationByNumeroIncorporation
 };

@@ -44,6 +44,24 @@ async function findConsultationById(id) {
     ]
   });
 }
+//
+async function findConsultationByNumeroIncorporation(numeroIncorporation) {
+  return Consultation.findAll({
+    include: [
+      {
+        model: Eleve,
+        where: { numeroIncorporation },
+        attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation"]
+      },
+      {
+        model: Cadre,
+        attributes: ["id", "nom", "grade"]
+      }
+    ],
+    order: [["dateDepart", "DESC"]]
+  });
+}
+
 //Consultation by cour
 async function findConsultationByCour(cour) {
   return Consultation.findAll({
@@ -83,5 +101,6 @@ module.exports = {
   findConsultationById,
   updateConsultation,
   findConsultationByCour,
-  findConsultationsByEleveId
+  findConsultationsByEleveId,
+  findConsultationByNumeroIncorporation
 };

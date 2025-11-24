@@ -61,7 +61,23 @@ const ConsultationSchema = sequelize.define("Consultation",{
             allowNull:false,
             defaultValue:false,
 
-        }
+        },
+        hospitalisation:{
+            type :DataTypes.INTEGER,
+            allowNull:false,
+            
+
+        },
+        Nonhospitalisation:{
+            type :DataTypes.INTEGER,
+            allowNull:true,
+            
+        },
+    
+        observation:{
+            type:DataTypes.TEXT,
+            allowNull:true,
+        },
 
 
 });

@@ -80,9 +80,14 @@ async function findConsultationByCour(cour) {
 }
 
 // Mise à jour d'une consultation
+// Mise à jour d'une consultation
 async function updateConsultation(id, data) {
-  return Consultation.update(data, { where: { id } });
+  await Consultation.update(data, { where: { id } });
+
+  // Retourne la nouvelle version actualisée
+  return Consultation.findOne({ where: { id } });
 }
+
 async function findConsultationsByEleveId(eleveId) {
   return Consultation.findAll({
     where: { eleveId },

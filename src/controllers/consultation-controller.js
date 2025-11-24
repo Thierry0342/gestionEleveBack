@@ -86,17 +86,30 @@ async function getConsultationByNumeroIncorporation(req, res) {
 
 
 // Mettre à jour une consultation
+// Mettre à jour une consultation
 async function updateConsultation(req, res) {
   try {
     const id = req.params.id;
     const data = req.body;
-    await consultationService.updateConsultation(id, data);
+
+    // Normalisation des champs numériques
+    const payload = {
+      ...data,
+      hospitalisation: data.hospitalisation !== undefined ? Number(data.hospitalisation) : null,
+      nonhospitalisation: data.nonhospitalisation !== undefined ? Number(data.nonhospitalisation) : null,
+      observation: data.observation ?? null
+    };
+
+    await consultationService.updateConsultation(id, payload);
+
     res.status(200).json({ message: "Consultation mise à jour" });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Erreur lors de la mise à jour de la consultation" });
   }
 }
+
 async function getConsultationsByEleveId(req, res) {
   try {
     const rows = await consultationService.findConsultationsByEleveId(req.params.eleveId);

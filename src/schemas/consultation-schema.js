@@ -64,7 +64,7 @@ const ConsultationSchema = sequelize.define("Consultation",{
         },
         hospitalisation:{
             type :DataTypes.INTEGER,
-            allowNull:false,
+            allowNull:true,
             
 
         },

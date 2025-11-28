@@ -4,7 +4,7 @@ const router = express.Router();
 const eleveDetailsController = require("../controllers/eleve-details-controller");
 
 router.post("/details", eleveDetailsController.getEleveDetailsBatch);
-router.get("/details", eleveDetailsController.getEleveDetailsBatch); // si tu veux garder GET
+router.get("/details", eleveDetailsController.getEleveDetailsBatch); 
 
 
 

@@ -10,6 +10,7 @@ const Detailsconsultation = sequelize.define("DetailsConsultation",{
       eleveId:{
         type: DataTypes.INTEGER,
         allowNull: false,
+        
 
       },
       hospitalisation: {

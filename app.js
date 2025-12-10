@@ -43,7 +43,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware global de logs
 app.use(logMiddleware);
 
-// Tes routes API
+
 app.use("/api/eleve", eleve_router);
 app.use("/api/cour",cour_route);
 app.use("/api/user",user_route);

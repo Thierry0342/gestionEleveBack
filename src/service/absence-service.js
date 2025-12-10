@@ -32,10 +32,24 @@ async function deleteAbsence(id) {
 async function findAbsencesByEleveId(eleveId) {
   return Absence.findAll({ where: { eleveId } });
 }
+async function findAbsenceByNumeroIncorporation(numeroIncorporation) {
+  return Absence.findAll({
+    include: [
+      {
+        model: Eleve,
+        where: { numeroIncorporation },
+        attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation","image"]
+      },
+  
+    ],
+   
+  });
+}
 
 module.exports = {
   createAbsence,
   findAllAbsences,
   deleteAbsence,
   findAbsencesByEleveId,
+  findAbsenceByNumeroIncorporation
 };

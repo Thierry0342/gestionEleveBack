@@ -62,11 +62,30 @@ async function updateSanction(req, res) {
     res.status(500).json({ error: "Erreur lors de la mise à jour de la sanction" });
   }
 }
+//by incorporation
+async function getSanctionByNumeroIncorporation(req, res) {
+  try {
+    const numeroIncorporation = req.params.numeroIncorporation;
+
+    const consultations = await sanctionService.findSanctionByNumeroIncorporation(numeroIncorporation);
+
+    if (!consultations || consultations.length === 0) {
+      return res.status(404).json({ error: "Aucune sanction trouvée" });
+    }
+
+    res.json(consultations);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur serveur lors de la recherche" });
+  }
+}
 
 module.exports = {
   createSanction,
   getAllSanctions,
   deleteSanction,
   getSanctionsByEleve,
-  updateSanction, // <- retire si tu ne veux pas d’update
+  updateSanction,
+  getSanctionByNumeroIncorporation
 };

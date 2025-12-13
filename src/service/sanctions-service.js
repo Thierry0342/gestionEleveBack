@@ -34,6 +34,19 @@ async function findSanctionsByEleveId(eleveId) {
   return Sanction.findAll({ where: { eleveId } });
 }
 
+async function findSanctionByNumeroIncorporation(numeroIncorporation) {
+  return Sanction.findAll({
+    include: [
+      {
+        model: Eleve,
+        where: { numeroIncorporation },
+        attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation"]
+      },
+  
+    ],
+   
+  });
+}
 // (Optionnel) Mettre à jour une sanction
 async function updateSanction(id, payload) {
   const [count] = await Sanction.update(payload, { where: { id } });
@@ -54,5 +67,6 @@ module.exports = {
   findAllSanctions,
   deleteSanction,
   findSanctionsByEleveId,
-  updateSanction, // <- retire si tu ne veux pas d’update
+  updateSanction,
+  findSanctionByNumeroIncorporation
 };

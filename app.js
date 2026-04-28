@@ -28,6 +28,7 @@ const gardeMalade = require('./src/routes/gardeMalade-route');
 const sanctionRoute = require('./src/routes/sanction-routes');
 const detailsRoute = require('./src/routes/eleve-details-route');
 const patcRoute = require('./src/routes/patc-route');
+const specialiteRoutes = require("./src/routes/specialite-routes");
 const { log } = require("console");
 
 var app = express();
@@ -62,13 +63,14 @@ app.use("/api/notefrancais",notefrancais_route);
 app.use("/api/sanctions",sanctionRoute);
 app.use("/api/eleves",detailsRoute);
 app.use("/api/patc",patcRoute);
+app.use('/api/specialites', specialiteRoutes);
 
 // ** IMPORTANT : servir les images AVANT le React SPA **
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));
 
 // Association et synchronisation BDD
 require("./src/schemas/association");
-DB.sync({ alter: true })
+DB.sync({ alter: { drop: false } })
   .then(() => {
     console.log("✅ Database synchronized");
   })

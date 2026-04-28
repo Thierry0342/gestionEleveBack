@@ -95,7 +95,7 @@ const Eleve = sequelize.define("Eleve", {
     allowNull: true,
   },
   image: {
-    type: DataTypes.STRING, // Chemin ou URL
+    type: DataTypes.STRING,
     allowNull: true,
   },
   niveaufiliere:{
@@ -135,8 +135,8 @@ const Eleve = sequelize.define("Eleve", {
   SpecialisteAptitude :{
     type : DataTypes.STRING,
     allowNull : true,
-
   },
+  
   groupeSaguin : {
     type : DataTypes.STRING,
     allowNull : true,

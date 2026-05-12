@@ -38,9 +38,9 @@ router.post('/import-excel', uploadExcel.single('file'), async (req, res) => {
     }
 
     const mappedData = rawData.map(row => ({
+      prenom: row['PRENOMS'] || row['PRENOM'] ,
       numeroIncorporation: row['NUM_INCORPORATION'],
       nom: row['NOM'],
-      prenom: row['PRENOMS'],
       dateNaissance: formatDate(row['DATE D NAISSANCE']),
       numCandidature: row['NUM CANDIDATURE'],
       CIN: row['NUM CIN'],

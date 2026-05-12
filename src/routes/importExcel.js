@@ -43,25 +43,13 @@ router.post('/import-excel', uploadExcel.single('file'), async (req, res) => {
       prenom: row['PRENOMS'],
       dateNaissance: formatDate(row['DATE D NAISSANCE']),
       numCandidature: row['NUM CANDIDATURE'],
-      lieuNaissance: row['LIEU DE NAISSANCE'],
       CIN: row['NUM CIN'],
-      lieuDelivrance: row['LIEU DE DELIVRANCE'],
-      lieuDuplicata: row['LIEU DUPLICATA'],
-      telephone3: row['TELEPHONE3'],
-      telephone2: row['TELEPHONE2'],
-      telephone1: row['TELEPHONE1'],
       cour: row['cour'],
       centreConcours: row['CENTRE DE CANDIDATURE'],
-      matricule: row['MATRICULE'],
       escadron: row['ESCADRON'],
       peloton: row['PELOTON'],
-      genreConcours: row['GENRE CONCOURS'],
-      situationFamiliale: row['SITUATION MATRIMONIALE'],
-      niveau: row['DIPLOME'],
-      religion: row['RELIGION'],
-      tailleChemise: row['TAILLECHEMISE'],
-      tourTete: row['TOURTETE'],
-      pointurePantalon: row['POINTURE'],
+      sexe :  row['SEXE'],
+    
     }));
 
     // 1. Création des élèves

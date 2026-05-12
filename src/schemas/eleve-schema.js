@@ -10,7 +10,6 @@ const Eleve = sequelize.define("Eleve", {
   cour:{
     type :DataTypes.INTEGER,
     allowNull:false,
-
   },
   nom: {
     type: DataTypes.STRING,
@@ -24,11 +23,9 @@ const Eleve = sequelize.define("Eleve", {
     type : DataTypes.STRING,
     allowNull : true,
   },
-
   escadron : {
     type :DataTypes.INTEGER,
     allowNull : false,
-
   },
   peloton : {
     type :DataTypes.INTEGER,
@@ -49,7 +46,6 @@ const Eleve = sequelize.define("Eleve", {
   centreConcours :{
     type : DataTypes.STRING,
     allowNull : true,
-
   },
   duplicata: {
     type: DataTypes.DATEONLY,
@@ -58,7 +54,6 @@ const Eleve = sequelize.define("Eleve", {
   lieuDuplicata: {
     type: DataTypes.STRING,
     allowNull: true,
-    
   },
   numeroIncorporation: {
     type: DataTypes.STRING,
@@ -76,6 +71,13 @@ const Eleve = sequelize.define("Eleve", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+
+  // ✅ CHAMP AJOUTÉ
+  adresseExacte: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
   situationFamiliale: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -83,12 +85,10 @@ const Eleve = sequelize.define("Eleve", {
   sexe:{
     type:DataTypes.STRING,
     allowNull:true
-
   },
   Specialiste:{
     type: DataTypes.STRING,
     allowNull: true,
-
   },
   facebook: {
     type: DataTypes.STRING,
@@ -101,7 +101,6 @@ const Eleve = sequelize.define("Eleve", {
   niveaufiliere:{
     type: DataTypes.STRING,
     allowNull: true,
-
   },
   genreConcours: {
     type: DataTypes.STRING,
@@ -126,7 +125,6 @@ const Eleve = sequelize.define("Eleve", {
   religion : {
     type : DataTypes.STRING,
     allowNull : true,
-    
   },
   niveau : {
     type : DataTypes.STRING,
@@ -136,26 +134,14 @@ const Eleve = sequelize.define("Eleve", {
     type : DataTypes.STRING,
     allowNull : true,
   },
-  
   groupeSaguin : {
-    type : DataTypes.STRING,
-    allowNull : true,
-  },
-  niveau:{
     type : DataTypes.STRING,
     allowNull : true,
   },
   fady:{
     type : DataTypes.STRING,
     allowNull : true,
-
   }
-
-
-}, {
-  
-  
-});
-
+}, {});
 
 module.exports = Eleve;

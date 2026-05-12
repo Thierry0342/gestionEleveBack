@@ -18,7 +18,7 @@ const Eleve = sequelize.define("Eleve", {
   },
   prenom: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   numCandidature : {
     type : DataTypes.STRING,

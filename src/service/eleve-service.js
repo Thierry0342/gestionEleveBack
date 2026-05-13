@@ -12,6 +12,7 @@ const Diplome = require('../schemas/diplome-schema');
 const Filiere = require('../schemas/filiere-schema');
 const Note = require('../schemas/note-schema');
 const Specialite = require('../schemas/specialite-schema'); // ✅ nouveau
+const Tuteur = require('../schemas/tuteur-schema'); // ✅ Ajoutez ceci
 const { where } = require("sequelize");
 
 async function create(eleve, options = {}) {
@@ -23,7 +24,7 @@ async function findAll({ limit = 500, offset = 0 }) {
     limit,
     offset,
     include: [
-      Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere,
+      Tuteur,Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere,
       Sport, Accident, Diplome, Filiere,
       { model: Note, as: 'Note' },
       { model: Specialite, as: 'specialites' }, // ✅ nouveau
@@ -35,7 +36,7 @@ async function findAll({ limit = 500, offset = 0 }) {
 async function findByPk(id) {
   return Eleve.findByPk(id, {
     include: [
-      Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere,
+      Tuteur,Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere,
       Sport, Accident, Diplome, Filiere,
       { model: Note, as: 'Note' },
       { model: Specialite, as: 'specialites' }, // ✅ nouveau
@@ -46,7 +47,7 @@ async function findByPk(id) {
 async function deleteByPk(id) {
   const eleve = await Eleve.findByPk(id, {
     include: [
-      Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere,
+      Tuteur,Pointure, Conjointe, Mere, Pere, Enfant, Soeur, Frere,
       Sport, Accident, Diplome, Filiere,
       { model: Note, as: 'Note' },
       { model: Specialite, as: 'specialites' }, // ✅ nouveau
@@ -58,6 +59,7 @@ async function deleteByPk(id) {
   }
 
   await Promise.all([
+    eleve.Tuteur?.destroy(),
     eleve.Pointure?.destroy(),
     eleve.Conjointe?.destroy(),
     eleve.Mere?.destroy(),

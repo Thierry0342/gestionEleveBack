@@ -96,6 +96,106 @@ router.post('/import-excel', uploadExcel.single('file'), async (req, res) => {
     res.status(500).json({ message: 'Erreur pendant l\'import', error: err });
   }
 });
+//mis a jour 
+router.post('/update-from-excel', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+
+    function formatDate(dateVal) {
+      if (!dateVal) return null;
+      if (typeof dateVal === 'number') {
+        const date = XLSX.SSF.parse_date_code(dateVal);
+        if (!date) return null;
+        return `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
+      }
+      if (typeof dateVal === 'string') {
+        const parts = dateVal.split('/');
+        if (parts.length !== 3) return null;
+        const [day, month, year] = parts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      return null;
+    }
+
+    let totalUpdated = 0;
+    const errors = [];
+    const notFound = [];
+
+    for (const row of rawData) {
+      try {
+        const numCandidature = row['NUM_INSCR'];
+        if (!numCandidature) continue;
+
+        // ── Trouver l'élève par NUM_INSCR + cour = 80 ──────────────────────
+        const eleve = await Eleve.findOne({
+          where: {
+            numCandidature: numCandidature,
+            cour: 80,
+          }
+        });
+
+        if (!eleve) {
+          notFound.push({ numCandidature });
+          continue;
+        }
+
+        const eleveId = eleve.id;
+
+        // ── 1. Mise à jour Eleve (CIN, LIEU CIN, ADRESSE, TELEPHONE) ───────
+       const champsAMettreAJour = {};
+
+      if (row['CIN'])       champsAMettreAJour.CIN      = row['CIN'];
+      if (row['LIEU DE NAISSANCE'])       champsAMettreAJour.lieuNaissance      = row['LIEU DE NAISSANCE'];
+      if (row['DATE CIN'])  champsAMettreAJour.dateDelivrance   = formatDate(row['DATE CIN']);
+      if (row['LIEU CIN'])  champsAMettreAJour.lieuDelivrance   = row['LIEU CIN'];
+      if (row['ADRESSE'])   champsAMettreAJour.adresseExacte   = row['ADRESSE'];
+      if (row['TPH'])       champsAMettreAJour.telephone3        = row['TPH'];
+
+      await eleve.update(champsAMettreAJour);
+
+        // ── 2. Mise à jour Père ─────────────────────────────────────────────
+        if (row['PÈRE']) {
+          await Pere.update(
+            { nom: row['PÈRE'] },
+            { where: { eleveId } }
+          );
+        }
+
+        // ── 3. Mise à jour Mère ─────────────────────────────────────────────
+        if (row['MÈRE']) {
+          await Mere.update(
+            { nom: row['MÈRE'] },
+            { where: { eleveId } }
+          );
+        }
+
+        totalUpdated++;
+
+      } catch (rowErr) {
+        errors.push({
+          numCandidature: row['NUM_INSCR'] || '?',
+          erreur: rowErr.message,
+        });
+      }
+    }
+
+    res.status(200).json({
+      message: 'Mise à jour terminée',
+      totalUpdated,
+      totalNotFound: notFound.length,
+      notFound,
+      totalErrors: errors.length,
+      errors,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant la mise à jour", error: err.message });
+  }
+});
 
 //note 
 
@@ -327,13 +427,14 @@ router.post('/import-parents', uploadExcel.single('file'), async (req, res) => {
       const nomParent = row['NomParent'];
       const adresseParent = row['adresseParent'] || null;
       const telParent = row['TelParent'] || null;
+      const cour = 80 
 
       if (!numeroIncorporation || !lienParente || !nomParent) {
         console.log(`Données incomplètes : ${JSON.stringify(row)}`);
         continue;
       }
 
-      const eleve = await Eleve.findOne({ where: { numeroIncorporation: numeroIncorporation } });
+      const eleve = await Eleve.findOne({ where: { numeroIncorporation: numeroIncorporation } } );
       if (!eleve) {
         console.log(`Élève introuvable pour NumInc=${numeroIncorporation}`);
         continue;

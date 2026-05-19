@@ -152,7 +152,7 @@ router.post('/update-from-excel', uploadExcel.single('file'), async (req, res) =
       if (row['DATE CIN'])  champsAMettreAJour.dateDelivrance   = formatDate(row['DATE CIN']);
       if (row['LIEU CIN'])  champsAMettreAJour.lieuDelivrance   = row['LIEU CIN'];
       if (row['ADRESSE'])   champsAMettreAJour.adresseExacte   = row['ADRESSE'];
-      if (row['TPH'])       champsAMettreAJour.telephone3        = row['TPH'];
+      if (row['TPH'])       champsAMettreAJour.telephone2        = row['TPH'];
 
       await eleve.update(champsAMettreAJour);
 

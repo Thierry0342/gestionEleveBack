@@ -66,6 +66,10 @@ const SportSchema = sequelize.define("Sport",{
         defaultValue : false,
         
       },
+      autresSport: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
         
     })
         

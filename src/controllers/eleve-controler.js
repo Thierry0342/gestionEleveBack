@@ -329,11 +329,29 @@ async function update(req, res) {
     updatedData.diplomes = parseIfJson(updatedData.diplomes);
     updatedData.Pointure = parseIfJson(updatedData.Pointure);
     updatedData.Filiere  = parseIfJson(updatedData.Filiere);
-console.log("Données Famille reçues :", updatedData.famille);
+
     // ── Image ──────────────────────────────────────────────────────────────
     if (req.file) {
       updatedData.image = `/data/uploads/pictures/images/${req.file.filename}`;
     }
+    // ── Sports (upsert) ────────────────────────────────────────────────────────
+const sportsData = updatedData.sports; // array, ex: ['Football', 'Autre']
+if (Array.isArray(sportsData)) {
+  const sportPayload = {
+    Football:    sportsData.includes('Football'),
+    Basketball:  sportsData.includes('Basketball'),
+    Rugby:       sportsData.includes('Rugby'),
+    Musculation: sportsData.includes('Musculation'),
+    Volley_ball: sportsData.includes('Volley_ball'),
+    Athletisme:  sportsData.includes('Athletisme'),
+    Tennis:      sportsData.includes('Tennis'),
+    ArtsMartiaux: sportsData.includes('ArtsMartiaux'),
+    Autre:       sportsData.includes('Autre'),
+    // autresSport vient directement du body (string simple)
+    autresSport: updatedData.autresSport || null,
+  };
+  await sport_service.upsert(id, sportPayload);
+}
 
     // ── Tuteur (upsert) ────────────────────────────────────────────────────
     const tuteurData = updatedData.famille?.tuteur || null;

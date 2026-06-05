@@ -72,7 +72,7 @@ const Eleve = sequelize.define("Eleve", {
     allowNull: true,
   },
 
-  // ✅ CHAMP AJOUTÉ
+
   adresseExacte: {
     type: DataTypes.STRING,
     allowNull: true,

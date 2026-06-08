@@ -364,7 +364,7 @@ router.post('/import-absences', uploadExcel.single('file'), async (req, res) => 
   }
 });
 //foko sexe 
-router.post('/import-foko', uploadExcel.single('file'), async (req, res) => {
+router.post('/import-escadron', uploadExcel.single('file'), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
@@ -372,15 +372,15 @@ router.post('/import-foko', uploadExcel.single('file'), async (req, res) => {
     const rawData = XLSX.utils.sheet_to_json(sheet);
 
     let elevesModifies = 0;
-    const cour = 79;
+    const cour = 80;
 
     for (const row of rawData) {
-      const numeroIncorporation = row['NR'];
-      const sexe = row['SEXE'];
-      const fady = row['FOKO'];
+      const numeroIncorporation = row['INC'];
+      const escadron = row['ESCADRON'];
+      const peloton = row['PELOTON'];
 
       // Validation simple
-      if (!numeroIncorporation || !sexe || !fady) {
+      if (!numeroIncorporation || !escadron || !peloton) {
         console.log(`Données incomplètes pour NR=${numeroIncorporation}`);
         continue;
       }
@@ -395,7 +395,7 @@ router.post('/import-foko', uploadExcel.single('file'), async (req, res) => {
       }
 
       // Mise à jour des champs
-      await eleve.update({ sexe, fady });
+      await eleve.update({ escadron, peloton });
       elevesModifies++;
     }
 

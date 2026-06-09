@@ -22,6 +22,20 @@ async function findAllAbsences() {
       },
     });
   }
+ async function findAbsencesByMultipleIncoporations(incorporations, cour) {
+    const whereEleve = { numeroIncorporation: incorporations };
+    if (cour) whereEleve.cour = cour;  // AJOUT filtre cour
+
+    return Absence.findAll({
+        include: [
+            {
+                model: Eleve,
+                where: whereEleve,
+                attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation", "image"]
+            }
+        ]
+    });
+}
 
 // Supprimer une absence par ID
 async function deleteAbsence(id) {
@@ -51,5 +65,6 @@ module.exports = {
   findAllAbsences,
   deleteAbsence,
   findAbsencesByEleveId,
-  findAbsenceByNumeroIncorporation
+  findAbsenceByNumeroIncorporation,
+  findAbsencesByMultipleIncoporations  
 };

@@ -22,6 +22,25 @@ async function findAllConsultations() {
     ]
   });
 }
+async function findConsultationsByMultipleIncoporations(incorporations, cour) {
+    const whereEleve = { numeroIncorporation: incorporations };
+    if (cour) whereEleve.cour = cour;  // filtre promotion
+
+    return Consultation.findAll({
+        include: [
+            {
+                model: Eleve,
+                where: whereEleve,
+                attributes: ["id", "nom", "prenom", "matricule", "numeroIncorporation", "image"]
+            },
+            {
+                model: Cadre,
+                attributes: ["id", "nom", "grade"]
+            }
+        ],
+        order: [["dateDepart", "DESC"]]
+    });
+}
 
 // Supprimer une consultation par ID
 async function deleteConsultation(id) {
@@ -107,5 +126,6 @@ module.exports = {
   updateConsultation,
   findConsultationByCour,
   findConsultationsByEleveId,
-  findConsultationByNumeroIncorporation
+  findConsultationByNumeroIncorporation,
+  findConsultationsByMultipleIncoporations  
 };

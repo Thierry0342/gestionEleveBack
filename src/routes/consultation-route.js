@@ -11,5 +11,6 @@ router.get("/incorp/:numeroIncorporation", consultationController.getConsultatio
 router.get("/:id", consultationController.getConsultationById);
 router.delete("/:id", consultationController.deleteConsultation);
 router.put("/:id", consultationController.updateConsultation);
+router.post("/bulk", consultationController.getConsultationsByMultipleIncoporations);
 
 module.exports = router;

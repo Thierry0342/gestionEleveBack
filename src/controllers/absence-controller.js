@@ -27,6 +27,24 @@ async function getAllAbsences(req, res) {
     console.log(error);
   }
 }
+async function getAbsencesByMultipleIncoporations(req, res) {
+    try {
+        const { incorporations, cour } = req.body;  
+
+        if (!Array.isArray(incorporations) || incorporations.length === 0) {
+            return res.status(400).json({ error: "Liste d'incorporations requise." });
+        }
+
+        const absences = await absenceService.findAbsencesByMultipleIncoporations(
+            incorporations, 
+            cour  // AJOUT
+        );
+        res.json(absences);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erreur serveur" });
+    }
+}
 
 // Supprimer une absence par ID
 async function deleteAbsence(req, res) {
@@ -51,21 +69,17 @@ async function getAbsencesByEleve(req, res) {
 }
 //by incorporation
 async function getAbsenceByNumeroIncorporation(req, res) {
-  try {
-    const numeroIncorporation = req.params.numeroIncorporation;
+    try {
+        const numeroIncorporation = req.params.numeroIncorporation;
+        const absences = await absenceService.findAbsenceByNumeroIncorporation(numeroIncorporation);
 
-    const consultations = await absenceService.findAbsenceByNumeroIncorporation(numeroIncorporation);
+        // Retourne [] au lieu de 404 si aucune absence trouvée
+        res.json(absences || []);
 
-    if (!consultations || consultations.length === 0) {
-      return res.status(404).json({ error: "Aucune Absence trouvée" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erreur serveur lors de la recherche" });
     }
-
-    res.json(consultations);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erreur serveur lors de la recherche" });
-  }
 }
 
 module.exports = {
@@ -73,5 +87,6 @@ module.exports = {
   getAllAbsences,
   deleteAbsence,
   getAbsencesByEleve,
-  getAbsenceByNumeroIncorporation
+  getAbsenceByNumeroIncorporation,
+  getAbsencesByMultipleIncoporations  
 };

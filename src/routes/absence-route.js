@@ -7,5 +7,6 @@ router.get("/", absenceController.getAllAbsences);
 router.get("/eleve/:eleveId", absenceController.getAbsencesByEleve);
 router.get("/incorp/:numeroIncorporation", absenceController.getAbsenceByNumeroIncorporation);
 router.delete("/:id", absenceController.deleteAbsence);
+router.post("/bulk", absenceController.getAbsencesByMultipleIncoporations);
 
 module.exports = router;

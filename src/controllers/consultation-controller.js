@@ -22,7 +22,25 @@ async function getAllConsultations(req, res) {
     res.status(500).json({ error: "Erreur lors de la récupération des consultations" });
   }
 }
+async function getConsultationsByMultipleIncoporations(req, res) {
+    try {
+        const { incorporations, cour } = req.body;
 
+        if (!Array.isArray(incorporations) || incorporations.length === 0) {
+            return res.status(400).json({ error: "Liste d'incorporations requise." });
+        }
+
+        const consultations = await consultationService.findConsultationsByMultipleIncoporations(
+            incorporations,
+            cour
+        );
+
+        res.json(consultations);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erreur serveur" });
+    }
+}
 // Supprimer une consultation par ID
 async function deleteConsultation(req, res) {
   try {
@@ -67,21 +85,18 @@ async function getfindConsultationByCour(req, res) {
 }
 //by incorporation
 async function getConsultationByNumeroIncorporation(req, res) {
-  try {
-    const numeroIncorporation = req.params.numeroIncorporation;
+    try {
+        const numeroIncorporation = req.params.numeroIncorporation;
+        const consultations = await consultationService.findConsultationByNumeroIncorporation(numeroIncorporation);
 
-    const consultations = await consultationService.findConsultationByNumeroIncorporation(numeroIncorporation);
+        // AVANT : retournait 404 si vide → causait des erreurs dans le frontend
+        // APRÈS : retourne [] si aucune consultation trouvée
+        res.json(consultations || []);
 
-    if (!consultations || consultations.length === 0) {
-      return res.status(404).json({ error: "Aucune consultation trouvée" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erreur serveur lors de la recherche" });
     }
-
-    res.json(consultations);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erreur serveur lors de la recherche" });
-  }
 }
 
 
@@ -127,5 +142,6 @@ module.exports = {
   updateConsultation,
   getConsultationsByEleveId,
   getfindConsultationByCour,
-  getConsultationByNumeroIncorporation
+  getConsultationByNumeroIncorporation,
+  getConsultationsByMultipleIncoporations  
 };

@@ -24,7 +24,7 @@ async function findAllAbsences() {
   }
  async function findAbsencesByMultipleIncoporations(incorporations, cour) {
     const whereEleve = { numeroIncorporation: incorporations };
-    if (cour) whereEleve.cour = cour;  // AJOUT filtre cour
+    if (cour) whereEleve.cour = cour;  
 
     return Absence.findAll({
         include: [

@@ -3,6 +3,7 @@ const router = express.Router();
 const sanctionController = require("../controllers/sanctions-controller");
 
 router.post("/", sanctionController.createSanction);
+router.post("/bulk", sanctionController.getSanctionsBulk); 
 router.get("/", sanctionController.getAllSanctions);
 router.get("/eleve/:eleveId", sanctionController.getSanctionsByEleve);
 router.get("/incorp/:numeroIncorporation", sanctionController.getSanctionByNumeroIncorporation);

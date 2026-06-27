@@ -61,6 +61,22 @@ async function updateSanction(id, payload) {
     },
   });
 }
+async function findAllSanctionsBulk(incorporations, cour) {
+  const whereEleve = { numeroIncorporation: incorporations };
+  if (cour) whereEleve.cour = cour;
+
+  return Sanction.findAll({
+    include: {
+      model: Eleve,
+      where: whereEleve,
+      attributes: [
+        "Id", "nom", "prenom", "matricule",
+        "escadron", "peloton", "numeroIncorporation", "cour",
+      ],
+    },
+    order: [["id", "DESC"]],
+  });
+}
 
 module.exports = {
   createSanction,
@@ -68,5 +84,6 @@ module.exports = {
   deleteSanction,
   findSanctionsByEleveId,
   updateSanction,
-  findSanctionByNumeroIncorporation
+  findSanctionByNumeroIncorporation,
+  findAllSanctionsBulk  
 };

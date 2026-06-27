@@ -80,6 +80,22 @@ async function getSanctionByNumeroIncorporation(req, res) {
     res.status(500).json({ error: "Erreur serveur lors de la recherche" });
   }
 }
+async function getSanctionsBulk(req, res) {
+  try {
+    const { incorporations, cour } = req.body;
+
+    if (!Array.isArray(incorporations) || incorporations.length === 0) {
+      return res.status(400).json({ error: "Liste d'incorporations requise." });
+    }
+
+    const sanctions = await sanctionService.findAllSanctionsBulk(incorporations, cour);
+    res.json(sanctions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur lors de la récupération des sanctions bulk." });
+  }
+}
+
 
 module.exports = {
   createSanction,
@@ -87,5 +103,6 @@ module.exports = {
   deleteSanction,
   getSanctionsByEleve,
   updateSanction,
-  getSanctionByNumeroIncorporation
+  getSanctionByNumeroIncorporation,
+  getSanctionsBulk
 };

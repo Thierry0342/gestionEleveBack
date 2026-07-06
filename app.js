@@ -30,7 +30,7 @@ const detailsRoute = require('./src/routes/eleve-details-route');
 const patcRoute = require('./src/routes/patc-route');
 const specialiteRoutes = require("./src/routes/specialite-routes");
 const { log } = require("console");
-
+const observationRoute = require('./src/routes/observation-route');
 var app = express();
 
 // ── Parsers (une seule fois, avec limite explicite) ────────────────────────────
@@ -65,6 +65,7 @@ app.use("/api/sanctions",sanctionRoute);
 app.use("/api/eleves",detailsRoute);
 app.use("/api/patc",patcRoute);
 app.use('/api/specialites', specialiteRoutes);
+app.use("/api/observations", observationRoute); 
 
 // ** IMPORTANT : servir les images AVANT le React SPA **
 app.use('/data/uploads', express.static(path.join(__dirname, 'public/data/uploads')));

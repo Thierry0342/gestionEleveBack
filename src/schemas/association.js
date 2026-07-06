@@ -28,6 +28,7 @@ const Specialite = require("./specialite-schema");
 //relation pere fils
 //tuteur 
 const Tuteur = require("./tuteur-schema");
+const Observation = require("./observation-schema");
 
 Eleve.hasOne(Pere, { foreignKey: "eleveId" });
 Pere.belongsTo(Eleve, { foreignKey: "eleveId" });
@@ -100,5 +101,7 @@ Specialite.belongsTo(Eleve, { foreignKey: "eleveId" });
 //tuteur 
 Eleve.hasOne(Tuteur, { foreignKey: "eleveId" });
 Tuteur.belongsTo(Eleve, { foreignKey: "eleveId" });
-
-module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre,User,Log,Permission,Note,NoteFrancais,Sanction,Patc,Specialite,Tuteur};
+//obs
+Eleve.hasMany(Observation, { foreignKey: "eleveId" });
+Observation.belongsTo(Eleve, { foreignKey: "eleveId" });
+module.exports = { Eleve, Pointure,Conjointe ,Mere,Pere,Soeur,Frere,Accident,Sport,Diplome,Filiere,Absence,Consultation,Cadre,User,Log,Permission,Note,NoteFrancais,Sanction,Patc,Specialite,Tuteur,Observation};

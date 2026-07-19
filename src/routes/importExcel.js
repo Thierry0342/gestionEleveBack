@@ -546,7 +546,7 @@ router.post('/import-matricules', uploadExcel.single('file'), async (req, res) =
     }
 
     let lignesModifiees = 0;
-    const coursId = 79;
+    const coursId = 80;
 
     for (const rawRow of rawData) {
       const row = cleanKeys(rawRow);

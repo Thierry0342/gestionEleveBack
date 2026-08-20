@@ -14,7 +14,7 @@ const ConsultationSchema = sequelize.define("Consultation",{
       },
        cadreId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         },
         dateDepart :{
             type : DataTypes.DATEONLY,

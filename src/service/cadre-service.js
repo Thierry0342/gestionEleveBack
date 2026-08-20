@@ -1,4 +1,6 @@
 const Cadre = require("../schemas/cadre-schema");
+const Consultation = require("../schemas/consultation-schema");
+const sequelize = require("../data-access/database-connection");
 const fs = require("fs");
 const path = require("path");
 
@@ -12,9 +14,23 @@ async function findAllCadre() {
   return Cadre.findAll();
 }
 
-// Supprimer un cadre par ID
+// Supprimer un cadre par ID (détache les consultations liées avant suppression)
 async function deleteCadre(id) {
-  return Cadre.destroy({ where: { id } });
+  const t = await sequelize.transaction();
+  try {
+    // On détache les consultations avant de supprimer le cadre
+    await Consultation.update(
+      { cadreId: null },
+      { where: { cadreId: id }, transaction: t }
+    );
+
+    await Cadre.destroy({ where: { id }, transaction: t });
+
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
 }
 
 // Obtenir un cadre par matricule (utilisé par getCadreBy)
@@ -28,15 +44,11 @@ async function updateCadre(id, data) {
 }
 
 // ===== Photo =====
-// Met à jour le champ photo, et supprime l'ancien fichier physique s'il existait
-// (évite d'accumuler des fichiers orphelins sur le disque à chaque changement de photo).
 async function updateCadrePhoto(id, photoPath) {
   const cadre = await Cadre.findByPk(id);
   if (!cadre) return null;
 
   if (cadre.photo) {
-    // cadre.photo est du type "/data/uploads/pictures/images/xxx.jpg" (URL publique).
-    // Le fichier physique est dans "<racine-projet>/public" + ce chemin (voir upload-config.js).
     const oldFilePath = path.join(__dirname, "..", "public", cadre.photo.replace(/^\//, ""));
     fs.unlink(oldFilePath, (err) => {
       if (err && err.code !== "ENOENT") {

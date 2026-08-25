@@ -480,6 +480,252 @@ router.post('/import-parents', uploadExcel.single('file'), async (req, res) => {
     });
   }
 });
+router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+
+    function sheetToRows(name) {
+      const sheet = workbook.Sheets[name];
+      if (!sheet) return [];
+      return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    }
+
+    function cleanMatricule(v) {
+      if (v === null || v === undefined) return null;
+      const s = String(v).trim();
+      if (s === '' || s === '-') return null;
+      return s;
+    }
+
+    // Regroupe les lignes d'une feuille secondaire par matricule
+    function groupByMatricule(rows) {
+      const map = {};
+      for (const row of rows) {
+        const mle = cleanMatricule(row['matricule']);
+        if (!mle) continue;
+        if (!map[mle]) map[mle] = [];
+        map[mle].push(row);
+      }
+      return map;
+    }
+
+    const cadresRows = sheetToRows('Cadres');
+
+    const grades = groupByMatricule(sheetToRows('GradesSuccessifs'));
+    const diplomes = groupByMatricule(sheetToRows('Diplomes'));
+    const serments = groupByMatricule(sheetToRows('Serments'));
+    const affectations = groupByMatricule(sheetToRows('Affectations'));
+    const enfants = groupByMatricule(sheetToRows('Enfants'));
+    const decorations = groupByMatricule(sheetToRows('Decorations'));
+    const felicitations = groupByMatricule(sheetToRows('Felicitations'));
+    const punitions = groupByMatricule(sheetToRows('Punitions'));
+    const servicesMilitaires = groupByMatricule(sheetToRows('ServicesMilitaires'));
+    const relationsInterets = groupByMatricule(sheetToRows('RelationsInterets'));
+    const sanitaireRows = groupByMatricule(sheetToRows('Sanitaire'));
+
+    let inserted = 0;
+    let updated = 0;
+    const echecs = [];
+
+    for (const row of cadresRows) {
+      const matricule = cleanMatricule(row['matricule']);
+      const nom = row['nom'];
+
+      if (!nom) {
+        echecs.push({ row, reason: 'nom manquant' });
+        continue;
+      }
+
+      // ── Champs scalaires (copie directe depuis la feuille "Cadres") ──
+      const payload = {
+        matricule,
+        nom: String(nom).trim(),
+        prenom: row['prenom'] || null,
+        phone: row['phone'] || null,
+        grade: row['grade'] || null,
+        service: row['service'] || null,
+
+        positionEffectiveUnite: row['positionEffectiveUnite'] || null,
+        positionEffectiveFonction: row['positionEffectiveFonction'] || null,
+        positionEffectiveDepuisLe: row['positionEffectiveDepuisLe'] || null,
+        positionEffectiveDisponibleLe: row['positionEffectiveDisponibleLe'] || null,
+
+        positionTheoriqueUnite: row['positionTheoriqueUnite'] || null,
+        positionTheoriqueFonction: row['positionTheoriqueFonction'] || null,
+        positionTheoriqueDepuisLe: row['positionTheoriqueDepuisLe'] || null,
+        positionTheoriqueDisponibleLe: row['positionTheoriqueDisponibleLe'] || null,
+
+        dateNaissance: row['dateNaissance'] || null,
+        lieuNaissance: row['lieuNaissance'] || null,
+        sexe: row['sexe'] || null,
+        groupeSanguin: row['groupeSanguin'] || null,
+        taille: row['taille'] || null,
+        pereNomPrenom: row['pereNomPrenom'] || null,
+        mereNomPrenom: row['mereNomPrenom'] || null,
+        groupeEthnique: row['groupeEthnique'] || null,
+        religion: row['religion'] || null,
+
+        cin: row['cin'] || null,
+        cinDelivreLe: row['cinDelivreLe'] || null,
+        cinDelivreA: row['cinDelivreA'] || null,
+
+        dateMariage: row['dateMariage'] || null,
+        autorisationMariage: row['autorisationMariage'] || null,
+        mariageRompuLe: row['mariageRompuLe'] || null,
+        motifRompuMariage: row['motifRompuMariage'] || null,
+        remarieLe: row['remarieLe'] || null,
+        deuxiemeAutorisationMariage: row['deuxiemeAutorisationMariage'] || null,
+        numeroDateJugementDeces: row['numeroDateJugementDeces'] || null,
+
+        epouxNomPrenom: row['epouxNomPrenom'] || null,
+        epouxFonction: row['epouxFonction'] || null,
+        epouxMatricule: row['epouxMatricule'] || null,
+        epouxCin: row['epouxCin'] || null,
+        epouxOrganismeEmployeur: row['epouxOrganismeEmployeur'] || null,
+        epouxRefDecisionIncorporation: row['epouxRefDecisionIncorporation'] || null,
+        epouxDelivreLe: row['epouxDelivreLe'] || null,
+        epouxDelivreA: row['epouxDelivreA'] || null,
+
+        dateIncorporation: row['dateIncorporation'] || null,
+        diplomeDecisionIncorporation: row['diplomeDecisionIncorporation'] || null,
+
+        nombrePiecesJointes: row['nombrePiecesJointes'] || null,
+        nombreFeuillesSupplementaires: row['nombreFeuillesSupplementaires'] || null,
+      };
+
+      // ── Champs JSON (sections répétables reliées par matricule) ──
+      if (matricule) {
+        payload.enfants = (enfants[matricule] || []).map(r => ({
+          numero: r['numero'] || '',
+          nomPrenom: r['nomPrenom'] || '',
+          dateNaissance: r['dateNaissance'] || '',
+          lieuNaissance: r['lieuNaissance'] || '',
+          qualite: r['qualite'] || '',
+          sexe: r['sexe'] || '',
+          observation: r['observation'] || '',
+        }));
+
+        payload.servicesMilitaires = (servicesMilitaires[matricule] || []).map(r => ({
+          typeService: r['typeService'] || '',
+          dateDebut: r['dateDebut'] || '',
+          dateFin: r['dateFin'] || '',
+          promoClasse: r['promoClasse'] || '',
+          mleSN: r['mleSN'] || '',
+        }));
+
+        payload.gradesSuccessifs = (grades[matricule] || []).map(r => ({
+          grade: r['grade'] || '',
+          dateNomination: r['dateNomination'] || '',
+          refDecision: r['refDecision'] || '',
+        }));
+
+        payload.decorations = (decorations[matricule] || []).map(r => ({
+          nature: r['nature'] || '',
+          refAttribution: r['refAttribution'] || '',
+          datePriseEffet: r['datePriseEffet'] || '',
+        }));
+
+        payload.felicitations = (felicitations[matricule] || []).map(r => ({
+          nature: r['nature'] || '',
+          reference: r['reference'] || '',
+          libelle: r['libelle'] || '',
+          autorite: r['autorite'] || '',
+        }));
+
+        payload.punitions = (punitions[matricule] || []).map(r => ({
+          taux: r['taux'] || '',
+          type: r['type'] || '',
+          dpe: r['dpe'] || '',
+          autoriteInfligeante: r['autoriteInfligeante'] || '',
+          reference: r['reference'] || '',
+          libelle: r['libelle'] || '',
+        }));
+
+        payload.diplomes = (diplomes[matricule] || []).map(r => ({
+          intitule: r['intitule'] || '',
+          reference: r['reference'] || '',
+          entite: r['entite'] || '',
+          categorie: r['categorie'] || '',
+        }));
+
+        payload.serments = (serments[matricule] || []).map(r => ({
+          typePrestation: r['typePrestation'] || '',
+          datePrestation: r['datePrestation'] || '',
+          lieu: r['lieu'] || '',
+          observations: r['observations'] || '',
+        }));
+
+        payload.affectations = (affectations[matricule] || []).map(r => ({
+          unite: r['unite'] || '',
+          fonction: r['fonction'] || '',
+          acDuLe: r['acDuLe'] || '',
+          refDecision: r['refDecision'] || '',
+          motif: r['motif'] || '',
+          dateDisponibilite: r['dateDisponibilite'] || '',
+          referenceCR: r['referenceCR'] || '',
+        }));
+
+        payload.relationsInterets = (relationsInterets[matricule] || []).map(r => ({
+          type: r['type'] || '',
+          districtRegion: r['districtRegion'] || '',
+        }));
+
+        // Sanitaire : une seule ligne attendue par matricule
+        const san = (sanitaireRows[matricule] || [])[0];
+        if (san) {
+          payload.sanitairePATC = {
+            reference: san['patcReference'] || '',
+            medecinTraitant: san['patcMedecinTraitant'] || '',
+            nombrePATC: san['patcNombrePATC'] || '',
+            dateDebutPATC: san['patcDateDebutPATC'] || '',
+            renouvelable: san['patcRenouvelable'] || '',
+          };
+          payload.sanitaireCREFA = {
+            reference: san['crefaReference'] || '',
+            type: san['crefaType'] || '',
+            referenceEnvoiCREFA: san['crefaReferenceEnvoiCREFA'] || '',
+            referenceEnvoiFinance: san['crefaReferenceEnvoiFinance'] || '',
+            observation: san['crefaObservation'] || '',
+          };
+        }
+      }
+
+      // ── Création ou mise à jour (upsert par matricule si présent) ──
+      try {
+        let existing = null;
+        if (matricule) {
+          existing = await Cadre.findOne({ where: { matricule } });
+        }
+
+        if (existing) {
+          await existing.update(payload);
+          updated++;
+        } else {
+          await Cadre.create(payload);
+          inserted++;
+        }
+      } catch (rowErr) {
+        echecs.push({ row: { matricule, nom }, reason: rowErr.message });
+      }
+    }
+
+    res.status(200).json({
+      message: 'Import des fiches cadres terminé',
+      inserted,
+      updated,
+      failed: echecs.length,
+      details: echecs,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur pendant l'import des fiches cadres", error: err.message });
+  } finally {
+    try {
+      await fs.promises.unlink(req.file.path);
+    } catch {}
+  }
+});
+
 //cadre 
 router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
   try {

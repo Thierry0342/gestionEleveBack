@@ -511,7 +511,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       const row = cleanKeys(rawRow);
 
       const nom = row['NOM ET PRENOMS'];
-      const matricule = cleanMatricule(row['MLE']);
+      const matricule = row['MLE'];
       const grade = row['GRADE'];
       const service = row['UNITE'];
       const phone = row['TPH'] || row['NR TPH']; // gère les deux variantes de nom de colonne

@@ -18,7 +18,7 @@ const CadreSchema = sequelize.define("Cadre", {
   },
 
   // ===== IDENTIFICATION =====
-  matricule: { type: DataTypes.INTEGER, allowNull: false, unique: true },
+  matricule: { type: DataTypes.STRING, allowNull: true, unique: true },
   nom: { type: DataTypes.STRING, allowNull: false },
   prenom: { type: DataTypes.STRING, allowNull: true },
   phone: { type: DataTypes.STRING, allowNull: true },

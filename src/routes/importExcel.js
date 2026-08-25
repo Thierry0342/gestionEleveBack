@@ -496,34 +496,54 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       return cleaned;
     }
 
+    // Nettoie le MLE : ignore les valeurs vides, "-", ou juste des espaces
+    function cleanMatricule(v) {
+      if (v === null || v === undefined) return null;
+      const s = String(v).trim();
+      if (s === '' || s === '-') return null;
+      return s;
+    }
+
     let cadresImportes = 0;
+    const echecs = [];
 
     for (const rawRow of rawData) {
       const row = cleanKeys(rawRow);
 
       const nom = row['NOM ET PRENOMS'];
-      const matricule = row['MLE'];
+      const matricule = cleanMatricule(row['MLE']);
       const grade = row['GRADE'];
       const service = row['UNITE'];
-      const phone = row['NR TPH'];
+      const phone = row['TPH'] || row['NR TPH']; // gère les deux variantes de nom de colonne
 
-      if (!nom || !matricule || !grade || !service) {
+      // matricule n'est plus obligatoire
+      if (!nom || !grade || !service) {
         console.log(`Ligne incomplète : ${JSON.stringify(row)}`);
+        echecs.push({ row, reason: 'nom/grade/unite manquant' });
         continue;
       }
 
-      await Cadre.create({
-        nom: nom.trim(),
-        matricule: String(matricule).trim(),
-        grade: grade.trim(),
-        service: service.trim(),
-        phone: phone
-      });
-
-      cadresImportes++;
+      try {
+        await Cadre.create({
+          nom: nom.trim(),
+          matricule,
+          grade: grade.trim(),
+          service: service.trim(),
+          phone
+        });
+        cadresImportes++;
+      } catch (rowErr) {
+        // ex: doublon de matricule -> ne bloque plus tout l'import
+        echecs.push({ row, reason: rowErr.message });
+      }
     }
 
-    res.status(200).json({ message: 'Import des cadres réussi', inserted: cadresImportes });
+    res.status(200).json({
+      message: 'Import des cadres réussi',
+      inserted: cadresImportes,
+      failed: echecs.length,
+      details: echecs
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Erreur pendant l'import des cadres", error: err.message });

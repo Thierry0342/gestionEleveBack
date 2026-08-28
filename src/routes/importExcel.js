@@ -726,71 +726,119 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
   }
 });
 
-//cadre 
+//cadre ```js
 router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
+
     const rawData = XLSX.utils.sheet_to_json(sheet);
 
     function cleanKeys(obj) {
       const cleaned = {};
+
       for (const key in obj) {
         cleaned[key.trim()] = obj[key];
       }
+
       return cleaned;
     }
 
     let cadresModifies = 0;
-    let cadresIntrouvables = 0;
-    let lignesInvalides = 0;
 
-    for (const rawRow of rawData) {
+    // Stocker les détails des cadres introuvables
+    const cadresIntrouvables = [];
+
+    // Stocker les détails des lignes invalides
+    const lignesInvalides = [];
+
+    for (let i = 0; i < rawData.length; i++) {
+      const rawRow = rawData[i];
       const row = cleanKeys(rawRow);
+
+      // +2 car la ligne 1 correspond généralement aux en-têtes Excel
+      const numeroLigne = i + 2;
 
       const matricule = row['MLE'];
       const service = row['UNITE'];
 
       // Vérification des données nécessaires
       if (!matricule || !service) {
-        console.log(`Ligne incomplète : ${JSON.stringify(row)}`);
-        lignesInvalides++;
+        const raisons = [];
+
+        if (!matricule) {
+          raisons.push('MLE manquant');
+        }
+
+        if (!service) {
+          raisons.push('UNITE manquante');
+        }
+
+        console.log(
+          `Ligne ${numeroLigne} invalide : ${JSON.stringify(row)}`
+        );
+
+        lignesInvalides.push({
+          ligne: numeroLigne,
+          matricule: matricule ? String(matricule).trim() : null,
+          service: service ? String(service).trim() : null,
+          raison: raisons.join(' et ')
+        });
+
         continue;
       }
+
+      const matriculeClean = String(matricule).trim();
+      const serviceClean = String(service).trim();
 
       // Recherche du cadre existant avec son matricule
       const cadre = await Cadre.findOne({
         where: {
-          matricule: String(matricule).trim()
+          matricule: matriculeClean
         }
       });
 
+      // Cadre introuvable
       if (!cadre) {
         console.log(
-          `Cadre introuvable avec le matricule : ${String(matricule).trim()}`
+          `Cadre introuvable - ligne ${numeroLigne} - matricule : ${matriculeClean}`
         );
-        cadresIntrouvables++;
+
+        cadresIntrouvables.push({
+          ligne: numeroLigne,
+          matricule: matriculeClean,
+          service: serviceClean
+        });
+
         continue;
       }
 
       // Modification UNIQUEMENT du service
       await cadre.update({
-        service: String(service).trim()
+        service: serviceClean
       });
 
       cadresModifies++;
 
       console.log(
-        `Service modifié : ${cadre.matricule} -> ${String(service).trim()}`
+        `Service modifié : ${cadre.matricule} -> ${serviceClean}`
       );
     }
 
     res.status(200).json({
       message: 'Mise à jour des services réussie',
+
+      // Nombre de modifications
       modified: cadresModifies,
-      notFound: cadresIntrouvables,
-      invalid: lignesInvalides
+
+      // Cadres non trouvés
+      notFound: cadresIntrouvables.length,
+      notFoundDetails: cadresIntrouvables,
+
+      // Lignes invalides
+      invalid: lignesInvalides.length,
+      invalidDetails: lignesInvalides
     });
 
   } catch (err) {
@@ -802,6 +850,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
     });
   }
 });
+
 //mandefa matricule fotsiny 
 router.post('/import-matricules', uploadExcel.single('file'), async (req, res) => {
   try {

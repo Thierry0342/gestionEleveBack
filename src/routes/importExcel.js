@@ -726,7 +726,7 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
   }
 });
 
-//cadre ```js
+//cadre
 router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
@@ -761,18 +761,18 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       const numeroLigne = i + 2;
 
       const matricule = row['MLE'];
-      const service = row['UNITE'];
+      const grade = row['GRADE'];
 
       // Vérification des données nécessaires
-      if (!matricule || !service) {
+      if (!matricule || !grade) {
         const raisons = [];
 
         if (!matricule) {
           raisons.push('MLE manquant');
         }
 
-        if (!service) {
-          raisons.push('UNITE manquante');
+        if (!grade) {
+          raisons.push('grade');
         }
 
         console.log(
@@ -782,7 +782,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
         lignesInvalides.push({
           ligne: numeroLigne,
           matricule: matricule ? String(matricule).trim() : null,
-          service: service ? String(service).trim() : null,
+          grade: grade ? String(grade).trim() : null,
           raison: raisons.join(' et ')
         });
 
@@ -790,7 +790,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       }
 
       const matriculeClean = String(matricule).trim();
-      const serviceClean = String(service).trim();
+      const gradeclean = String(service).trim();
 
       // Recherche du cadre existant avec son matricule
       const cadre = await Cadre.findOne({
@@ -808,21 +808,21 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
         cadresIntrouvables.push({
           ligne: numeroLigne,
           matricule: matriculeClean,
-          service: serviceClean
+          grade: gradeclean
         });
 
         continue;
       }
 
-      // Modification UNIQUEMENT du service
+      // Modification UNIQUEMENT du grade
       await cadre.update({
-        service: serviceClean
+        grade: gradeclean
       });
 
       cadresModifies++;
 
       console.log(
-        `Service modifié : ${cadre.matricule} -> ${serviceClean}`
+        `Service modifié : ${cadre.matricule} -> ${gradeclean}`
       );
     }
 

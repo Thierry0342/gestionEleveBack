@@ -742,37 +742,64 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       return cleaned;
     }
 
-    let cadresImportes = 0;
+    let cadresModifies = 0;
+    let cadresIntrouvables = 0;
+    let lignesInvalides = 0;
 
     for (const rawRow of rawData) {
       const row = cleanKeys(rawRow);
 
-      const nom = row['NOM ET PRENOMS'];
       const matricule = row['MLE'];
-      const grade = row['GRADE'];
       const service = row['UNITE'];
-      const phone = row['NR TPH'];
 
-      if (!nom || !matricule || !grade || !service) {
+      // Vérification des données nécessaires
+      if (!matricule || !service) {
         console.log(`Ligne incomplète : ${JSON.stringify(row)}`);
+        lignesInvalides++;
         continue;
       }
 
-      await Cadre.create({
-        nom: nom.trim(),
-        matricule: String(matricule).trim(),
-        grade: grade.trim(),
-        service: service.trim(),
-        phone: phone
+      // Recherche du cadre existant avec son matricule
+      const cadre = await Cadre.findOne({
+        where: {
+          matricule: String(matricule).trim()
+        }
       });
 
-      cadresImportes++;
+      if (!cadre) {
+        console.log(
+          `Cadre introuvable avec le matricule : ${String(matricule).trim()}`
+        );
+        cadresIntrouvables++;
+        continue;
+      }
+
+      // Modification UNIQUEMENT du service
+      await cadre.update({
+        service: String(service).trim()
+      });
+
+      cadresModifies++;
+
+      console.log(
+        `Service modifié : ${cadre.matricule} -> ${String(service).trim()}`
+      );
     }
 
-    res.status(200).json({ message: 'Import des cadres réussi', inserted: cadresImportes });
+    res.status(200).json({
+      message: 'Mise à jour des services réussie',
+      modified: cadresModifies,
+      notFound: cadresIntrouvables,
+      invalid: lignesInvalides
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Erreur pendant l'import des cadres", error: err.message });
+
+    res.status(500).json({
+      message: "Erreur pendant la mise à jour des services",
+      error: err.message
+    });
   }
 });
 //mandefa matricule fotsiny 

@@ -790,7 +790,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       }
 
       const matriculeClean = String(matricule).trim();
-      const gradeclean = String(service).trim();
+      const gradeclean = String(grade).trim();
 
       // Recherche du cadre existant avec son matricule
       const cadre = await Cadre.findOne({
@@ -822,7 +822,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       cadresModifies++;
 
       console.log(
-        `Service modifié : ${cadre.matricule} -> ${gradeclean}`
+        `grade modifie : ${cadre.matricule} -> ${gradeclean}`
       );
     }
 

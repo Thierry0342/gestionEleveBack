@@ -726,7 +726,7 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
   }
 });
 
-//cadre
+//cadre```js
 router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
@@ -757,7 +757,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       const rawRow = rawData[i];
       const row = cleanKeys(rawRow);
 
-      // +2 car la ligne 1 correspond généralement aux en-têtes Excel
+      // +2 car la ligne 1 correspond aux en-têtes Excel
       const numeroLigne = i + 2;
 
       const matricule = row['MLE'];
@@ -772,7 +772,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
         }
 
         if (!grade) {
-          raisons.push('grade');
+          raisons.push('GRADE manquant');
         }
 
         console.log(
@@ -781,8 +781,12 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
 
         lignesInvalides.push({
           ligne: numeroLigne,
-          matricule: matricule ? String(matricule).trim() : null,
-          grade: grade ? String(grade).trim() : null,
+          matricule: matricule
+            ? String(matricule).trim()
+            : null,
+          grade: grade
+            ? String(grade).trim()
+            : null,
           raison: raisons.join(' et ')
         });
 
@@ -790,7 +794,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
       }
 
       const matriculeClean = String(matricule).trim();
-      const gradeclean = String(grade).trim();
+      const gradeClean = String(grade).trim();
 
       // Recherche du cadre existant avec son matricule
       const cadre = await Cadre.findOne({
@@ -808,7 +812,7 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
         cadresIntrouvables.push({
           ligne: numeroLigne,
           matricule: matriculeClean,
-          grade: gradeclean
+          grade: gradeClean
         });
 
         continue;
@@ -816,20 +820,20 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
 
       // Modification UNIQUEMENT du grade
       await cadre.update({
-        grade: gradeclean
+        grade: gradeClean
       });
 
       cadresModifies++;
 
       console.log(
-        `grade modifie : ${cadre.matricule} -> ${gradeclean}`
+        `Grade modifié : ${cadre.matricule} -> ${gradeClean}`
       );
     }
 
     res.status(200).json({
-      message: 'Mise à jour des services réussie',
+      message: 'Mise à jour des grades réussie',
 
-      // Nombre de modifications
+      // Nombre de grades modifiés
       modified: cadresModifies,
 
       // Cadres non trouvés
@@ -845,11 +849,12 @@ router.post('/import-cadres', uploadExcel.single('file'), async (req, res) => {
     console.error(err);
 
     res.status(500).json({
-      message: "Erreur pendant la mise à jour des services",
+      message: "Erreur pendant la mise à jour des grades",
       error: err.message
     });
   }
 });
+
 
 //mandefa matricule fotsiny 
 router.post('/import-matricules', uploadExcel.single('file'), async (req, res) => {

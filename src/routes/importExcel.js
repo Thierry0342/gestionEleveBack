@@ -523,12 +523,12 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
     const relationsInterets = groupByMatricule(sheetToRows('RelationsInterets'));
     const sanitaireRows = groupByMatricule(sheetToRows('Sanitaire'));
 
-    let inserted = 0;
     let updated = 0;
+    let skipped = 0;
     const echecs = [];
 
     for (const row of cadresRows) {
-      const matricule = cleanMatricule(row['matricule']);
+      const matriculeFichier = cleanMatricule(row['matricule']);
       const nom = row['nom'];
 
       if (!nom) {
@@ -536,14 +536,40 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
         continue;
       }
 
+      const nomTrim = String(nom).trim();
+
+      // ── Recherche de la fiche existante ──
+      // 1) par matricule du fichier
+      // 2) si introuvable, par nom (le matricule du fichier peut être erroné,
+      //    celui déjà en base fait foi)
+      let existing = null;
+      if (matriculeFichier) {
+        existing = await Cadre.findOne({ where: { matricule: matriculeFichier } });
+      }
+      if (!existing) {
+        existing = await Cadre.findOne({ where: { nom: nomTrim } });
+      }
+
+      // Pas de fiche correspondante en base → on n'ajoute pas la personne
+      if (!existing) {
+        skipped++;
+        echecs.push({
+          row: { matricule: matriculeFichier, nom: nomTrim },
+          reason: 'aucune fiche correspondante en base (matricule et nom introuvables) — personne non ajoutée',
+        });
+        continue;
+      }
+
+      // Matricule de référence pour regrouper les feuilles secondaires :
+      // celui déjà en base (considéré fiable), sinon celui du fichier
+      const matriculeRef = existing.matricule || matriculeFichier;
+
       // ── Champs scalaires (copie directe depuis la feuille "Cadres") ──
+      // NB: matricule, grade et service ne sont plus mis à jour ici
+      // (gérés par une autre route)
       const payload = {
-        matricule,
-        nom: String(nom).trim(),
         prenom: row['prenom'] || null,
         phone: row['phone'] || null,
-        grade: row['grade'] || null,
-        service: row['service'] || null,
 
         positionEffectiveUnite: row['positionEffectiveUnite'] || null,
         positionEffectiveFonction: row['positionEffectiveFonction'] || null,
@@ -594,8 +620,8 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
       };
 
       // ── Champs JSON (sections répétables reliées par matricule) ──
-      if (matricule) {
-        payload.enfants = (enfants[matricule] || []).map(r => ({
+      if (matriculeRef) {
+        payload.enfants = (enfants[matriculeRef] || []).map(r => ({
           numero: r['numero'] || '',
           nomPrenom: r['nomPrenom'] || '',
           dateNaissance: r['dateNaissance'] || '',
@@ -605,7 +631,7 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
           observation: r['observation'] || '',
         }));
 
-        payload.servicesMilitaires = (servicesMilitaires[matricule] || []).map(r => ({
+        payload.servicesMilitaires = (servicesMilitaires[matriculeRef] || []).map(r => ({
           typeService: r['typeService'] || '',
           dateDebut: r['dateDebut'] || '',
           dateFin: r['dateFin'] || '',
@@ -613,26 +639,26 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
           mleSN: r['mleSN'] || '',
         }));
 
-        payload.gradesSuccessifs = (grades[matricule] || []).map(r => ({
+        payload.gradesSuccessifs = (grades[matriculeRef] || []).map(r => ({
           grade: r['grade'] || '',
           dateNomination: r['dateNomination'] || '',
           refDecision: r['refDecision'] || '',
         }));
 
-        payload.decorations = (decorations[matricule] || []).map(r => ({
+        payload.decorations = (decorations[matriculeRef] || []).map(r => ({
           nature: r['nature'] || '',
           refAttribution: r['refAttribution'] || '',
           datePriseEffet: r['datePriseEffet'] || '',
         }));
 
-        payload.felicitations = (felicitations[matricule] || []).map(r => ({
+        payload.felicitations = (felicitations[matriculeRef] || []).map(r => ({
           nature: r['nature'] || '',
           reference: r['reference'] || '',
           libelle: r['libelle'] || '',
           autorite: r['autorite'] || '',
         }));
 
-        payload.punitions = (punitions[matricule] || []).map(r => ({
+        payload.punitions = (punitions[matriculeRef] || []).map(r => ({
           taux: r['taux'] || '',
           type: r['type'] || '',
           dpe: r['dpe'] || '',
@@ -641,21 +667,21 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
           libelle: r['libelle'] || '',
         }));
 
-        payload.diplomes = (diplomes[matricule] || []).map(r => ({
+        payload.diplomes = (diplomes[matriculeRef] || []).map(r => ({
           intitule: r['intitule'] || '',
           reference: r['reference'] || '',
           entite: r['entite'] || '',
           categorie: r['categorie'] || '',
         }));
 
-        payload.serments = (serments[matricule] || []).map(r => ({
+        payload.serments = (serments[matriculeRef] || []).map(r => ({
           typePrestation: r['typePrestation'] || '',
           datePrestation: r['datePrestation'] || '',
           lieu: r['lieu'] || '',
           observations: r['observations'] || '',
         }));
 
-        payload.affectations = (affectations[matricule] || []).map(r => ({
+        payload.affectations = (affectations[matriculeRef] || []).map(r => ({
           unite: r['unite'] || '',
           fonction: r['fonction'] || '',
           acDuLe: r['acDuLe'] || '',
@@ -665,13 +691,13 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
           referenceCR: r['referenceCR'] || '',
         }));
 
-        payload.relationsInterets = (relationsInterets[matricule] || []).map(r => ({
+        payload.relationsInterets = (relationsInterets[matriculeRef] || []).map(r => ({
           type: r['type'] || '',
           districtRegion: r['districtRegion'] || '',
         }));
 
         // Sanitaire : une seule ligne attendue par matricule
-        const san = (sanitaireRows[matricule] || [])[0];
+        const san = (sanitaireRows[matriculeRef] || [])[0];
         if (san) {
           payload.sanitairePATC = {
             reference: san['patcReference'] || '',
@@ -690,29 +716,19 @@ router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res)
         }
       }
 
-      // ── Création ou mise à jour (upsert par matricule si présent) ──
+      // ── Mise à jour uniquement (jamais de création) ──
       try {
-        let existing = null;
-        if (matricule) {
-          existing = await Cadre.findOne({ where: { matricule } });
-        }
-
-        if (existing) {
-          await existing.update(payload);
-          updated++;
-        } else {
-          await Cadre.create(payload);
-          inserted++;
-        }
+        await existing.update(payload);
+        updated++;
       } catch (rowErr) {
-        echecs.push({ row: { matricule, nom }, reason: rowErr.message });
+        echecs.push({ row: { matricule: matriculeFichier, nom: nomTrim }, reason: rowErr.message });
       }
     }
 
     res.status(200).json({
       message: 'Import des fiches cadres terminé',
-      inserted,
       updated,
+      skipped,
       failed: echecs.length,
       details: echecs,
     });

@@ -480,6 +480,7 @@ router.post('/import-parents', uploadExcel.single('file'), async (req, res) => {
     });
   }
 });
+
 router.post('/import-fiche-cadres', uploadExcel.single('file'), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
@@ -889,7 +890,7 @@ router.post('/import-matricules', uploadExcel.single('file'), async (req, res) =
     }
 
     let lignesModifiees = 0;
-    const coursId = 80;
+    const coursId = 79;
 
     for (const rawRow of rawData) {
       const row = cleanKeys(rawRow);

@@ -77,6 +77,15 @@ async function getAbsencesByEleve(req, res) {
     res.status(500).json({ error: "Erreur lors de la récupération des absences de l'élève" });
   }
 }
+async function getAbsencesHistoriqueByCour(req, res) {
+  try {
+    res.json(await absenceService.findAbsencesHistoriqueByCour(req.params.cour));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur historique par cours" });
+  }
+}
+
 //by incorporation
 async function getAbsenceByNumeroIncorporation(req, res) {
     try {
@@ -90,6 +99,7 @@ async function getAbsenceByNumeroIncorporation(req, res) {
         console.error(error);
         res.status(500).json({ error: "Erreur serveur lors de la recherche" });
     }
+    
 }
 
 module.exports = {
@@ -99,5 +109,6 @@ module.exports = {
   getAbsencesByEleve,
   getAbsenceByNumeroIncorporation,
   getAbsencesByMultipleIncoporations,
-  getAbsencesHistorique 
+  getAbsencesHistorique,
+  getAbsencesHistoriqueByCour
 };

@@ -76,6 +76,56 @@ async function findAllAbsences() {
 async function deleteAbsence(id) {
   return Absence.destroy({ where: { id } });
 }
+async function findAbsencesHistoriqueByCour(cour) {
+  const courants = await Eleve.findAll({
+    where: { cour },
+    attributes: ["id", "nom", "prenom", "CIN", "matricule", "numeroIncorporation", "escadron", "peloton", "cour"],
+  });
+  if (!courants.length) return [];
+
+  const cins = [...new Set(courants.map(e => e.CIN).filter(v => v && String(v).trim()))];
+  const mats = [...new Set(courants.map(e => e.matricule).filter(v => v && String(v).trim()))];
+  const or = [];
+  if (cins.length) or.push({ CIN: cins });
+  if (mats.length) or.push({ matricule: mats });
+  if (!or.length) return [];
+
+  const candidats = await Eleve.findAll({
+    where: { cour: { [Op.ne]: cour }, [Op.or]: or },
+    attributes: ["id", "CIN", "matricule", "cour", "numeroIncorporation", "escadron", "peloton"],
+  });
+  const anciens = candidats.filter(a => Number(a.cour) < Number(cour));
+  if (!anciens.length) return [];
+
+  const absences = await Absence.findAll({
+    where: { eleveId: anciens.map(a => a.id) },
+    order: [["date", "ASC"]],
+  });
+
+  const same = (a, e) =>
+    (a.CIN && e.CIN && String(a.CIN).trim() === String(e.CIN).trim()) ||
+    (a.matricule && e.matricule && String(a.matricule).trim() === String(e.matricule).trim());
+
+  const result = [];
+  for (const e of courants) {
+    const blocs = anciens
+      .filter(a => same(a, e))
+      .map(a => ({
+        cour: a.cour,
+        numeroIncorporation: a.numeroIncorporation,
+        absences: absences.filter(x => x.eleveId === a.id),
+      }))
+      .filter(b => b.absences.length > 0);
+    if (blocs.length) {
+      result.push({
+        eleveId: e.id, nom: e.nom, prenom: e.prenom,
+        numeroIncorporation: e.numeroIncorporation,
+        escadron: e.escadron, peloton: e.peloton, anciens: blocs,
+      });
+    }
+  }
+  return result;
+}
 
 // Obtenir les absences d'un élève donné 
 async function findAbsencesByEleveId(eleveId) {
@@ -102,5 +152,6 @@ module.exports = {
   findAbsencesByEleveId,
   findAbsenceByNumeroIncorporation,
   findAbsencesByMultipleIncoporations,
-  findAbsencesHistoriqueByEleveId
+  findAbsencesHistoriqueByEleveId,
+  findAbsencesHistoriqueByCour
 };

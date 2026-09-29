@@ -9,4 +9,5 @@ router.get("/incorp/:numeroIncorporation", absenceController.getAbsenceByNumeroI
 router.delete("/:id", absenceController.deleteAbsence);
 router.post("/bulk", absenceController.getAbsencesByMultipleIncoporations);
 router.get("/historique/:eleveId", absenceController.getAbsencesHistorique);
+router.get("/historique-cour/:cour", absenceController.getAbsencesHistoriqueByCour);
 module.exports = router;

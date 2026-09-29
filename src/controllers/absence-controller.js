@@ -57,6 +57,16 @@ async function deleteAbsence(req, res) {
   }
 }
 
+async function getAbsencesHistorique(req, res) {
+  try {
+    const data = await absenceService.findAbsencesHistoriqueByEleveId(req.params.eleveId);
+    res.json(data);
+  } catch (error) {
+    console.error("getAbsencesHistorique:", error);
+    res.status(500).json({ error: "Erreur historique absences" });
+  }
+}
+
 // Obtenir les absences par élève
 async function getAbsencesByEleve(req, res) {
   try {
@@ -88,5 +98,6 @@ module.exports = {
   deleteAbsence,
   getAbsencesByEleve,
   getAbsenceByNumeroIncorporation,
-  getAbsencesByMultipleIncoporations  
+  getAbsencesByMultipleIncoporations,
+  getAbsencesHistorique 
 };
